@@ -1,9 +1,10 @@
-Requirements from Prof. Canny:
+Requirements/suggestions from Prof. Canny:
 1. Use TensorFlow
-2. Use CLEANED dataset
+2. Use CLEANED dataset (purpose of project is deep learning, not "deep data mining/cleaning")
 3. Make comparison with existing neural networks/state-of-the-art algorithms
 4. Can refer to the papers suggested in lec06.pdf
 5. The proposal will be due in the next few weeks
+6. Re-implementing things from existing papers is a viable project? (according to Prof. Canny?)
 
 
 Personal suggestions to make life easier
@@ -16,6 +17,15 @@ Personal suggestions to make life easier
 References for coding:
 This guy writes some basic implementations for deep learning:
 https://github.com/darksigma/Fundamentals-of-Deep-Learning-Book
+
+Generative models, autoencoders, GANs:
+https://openai.com/blog/generative-models/
+https://arxiv.org/abs/1406.2661
+https://arxiv.org/abs/1312.6114
+
+Existing music projects:
+BachBot (made by a new stats PhD student!): https://github.com/feynmanliang/bachbot
+deepjazz: https://github.com/jisungk/deepjazz
 
 
 
