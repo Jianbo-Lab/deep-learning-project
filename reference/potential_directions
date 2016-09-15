@@ -1,1 +1,29 @@
-Potential Directions
+Requirements from Prof. Canny:
+1. Use TensorFlow
+2. Use CLEANED dataset
+3. Make comparison with existing neural networks/state-of-the-art algorithms
+4. Can refer to the papers suggested in lec06.pdf
+5. The proposal will be due in the next few weeks
+
+
+Personal suggestions to make life easier
+1. Comment codes but avoid unnecessary comments.
+2. Separate different parts of codes as much as possible.
+
+
+
+
+References for coding:
+This guy writes some basic implementations for deep learning:
+https://github.com/darksigma/Fundamentals-of-Deep-Learning-Book
+
+
+
+
+
+
+
+
+
+
+Welcome extra comments!
