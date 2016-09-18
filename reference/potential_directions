@@ -18,11 +18,13 @@ References for coding:
 This guy writes some basic implementations for deep learning:
 https://github.com/darksigma/Fundamentals-of-Deep-Learning-Book
 
-Generative models, autoencoders, GANs:
+Generative models, GANs:
 https://openai.com/blog/generative-models/
 https://arxiv.org/abs/1406.2661
-https://arxiv.org/abs/1312.6114
-https://arxiv.org/abs/1609.03126
+https://arxiv.org/abs/1609.03126 <- recent paper by LeCun
+
+Autoencoding Variational Bayes (Kingma and Welling): https://arxiv.org/abs/1312.6114
+Review of Variational Inference (Blei): https://arxiv.org/abs/1601.00670
 
 Existing music projects:
 BachBot (made by a new stats PhD student!): https://github.com/feynmanliang/bachbot
