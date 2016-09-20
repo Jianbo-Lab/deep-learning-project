@@ -17,6 +17,9 @@ Personal suggestions to make life easier
 References for coding:
 This guy writes some basic implementations for deep learning:
 https://github.com/darksigma/Fundamentals-of-Deep-Learning-Book
+This is tensorflow implementation of VAE.
+https://github.com/oduerr/dl_tutorial/blob/master/tensorflow/vae/
+vae_demo.ipynb
 
 Generative models, GANs:
 https://openai.com/blog/generative-models/
