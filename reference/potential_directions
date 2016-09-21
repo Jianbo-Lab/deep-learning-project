@@ -20,6 +20,8 @@ https://github.com/darksigma/Fundamentals-of-Deep-Learning-Book
 This is tensorflow implementation of VAE.
 https://github.com/oduerr/dl_tutorial/blob/master/tensorflow/vae/
 vae_demo.ipynb
+This is another:
+https://jmetzen.github.io/2015-11-27/vae.html
 
 Generative models, GANs:
 https://openai.com/blog/generative-models/
@@ -34,6 +36,23 @@ A tutorial on VAE:
 https://arxiv.org/pdf/1606.05908v2.pdf 
 A note on the evaluation of generative models (This is a question I am thinking about that is related to both VAE and GAN):
 https://arxiv.org/abs/1511.01844
+
+Potential applications of GAN and VAE:
+A super-resolution
+A1. super-resolution via VAE:
+http://personal.ie.cuhk.edu.hk/~ccloy/files/eccv_2014_deepresolution.pdf / https://arxiv.org/pdf/1501.00092.pdf (same paper)
+Comments: Super-resolution is an ill-posed inverse problem. Using VAE enables one to incorperate information from a large set of image data.
+A2. super-resolution via GAN:
+https://arxiv.org/abs/1609.04802
+Comments: The discriminator network is used to differentiate between the high-resolution images and low-resolution images.
+B image denoising
+B1 VAE for image denoising: http://arxiv.org/pdf/1511.06406v2.pdf 
+B2 VAN: http://www.cc.gatech.edu/~hays/7476/projects/Avery_Wenchen/
+
+Vision tasks related to the above two tasks have been quite well intestigated. What about sounds? Can we discriminate speech from noise? (though I believe it's also been investigated) Further, what about the universe? For example, in the study of cosmic microwave background. For example, can we find aliens from noisy data received from the universe? 
+ 
+
+
 
 
 
