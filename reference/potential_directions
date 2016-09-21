@@ -31,7 +31,10 @@ Review of Variational Inference (Blei): https://arxiv.org/abs/1601.00670
 A neural-network oriented brief introduction of VAE with references attached at the end: 
 https://home.zhaw.ch/~dueo/bbs/files/vae.pdf
 A tutorial on VAE:
-https://arxiv.org/pdf/1606.05908v2.pdf
+https://arxiv.org/pdf/1606.05908v2.pdf 
+A note on the evaluation of generative models (This is a question I am thinking about that is related to both VAE and GAN):
+https://arxiv.org/abs/1511.01844
+
 
 
 
