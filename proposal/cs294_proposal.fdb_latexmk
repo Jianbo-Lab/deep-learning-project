@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex cs294_proposal"] 1474949126 "cs294_proposal.aux" "cs294_proposal.bbl" "cs294_proposal" 1474949312
+["bibtex cs294_proposal"] 1474949491 "cs294_proposal.aux" "cs294_proposal.bbl" "cs294_proposal" 1474949690
   "/usr/local/texlive/2014/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
   "cs294_bib.bib" 1474948826 1714 c0ab7f1f33ebd1ddfe95650486506936 ""
-  "cs294_proposal.aux" 1474949312 1325 e5ae9d0fba9a5d8745b0c1612bb02fc7 ""
+  "cs294_proposal.aux" 1474949689 1325 e5ae9d0fba9a5d8745b0c1612bb02fc7 ""
   "cs294_proposal.bcf" 0 -1 0 ""
   (generated)
   "cs294_proposal.bbl"
   "cs294_proposal.blg"
-["pdflatex"] 1474949311 "cs294_proposal.tex" "cs294_proposal.pdf" "cs294_proposal" 1474949312
+["pdflatex"] 1474949688 "cs294_proposal.tex" "cs294_proposal.pdf" "cs294_proposal" 1474949690
   "/usr/local/texlive/2014/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2014/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2014/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -177,12 +177,12 @@
   "/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1401025944 1445653 26a0aacf3d70032b1ec192e8c7792117 ""
   "/usr/local/texlive/2014/texmf-var/web2c/pdftex/pdflatex.fmt" 1401025990 3832012 904d82bdcc8abf2b1cd296990b82553b ""
   "/usr/local/texlive/2014/texmf.cnf" 1401025936 577 a59edbde8d3a8c549d0eeaab1739e2ff ""
-  "cs294_proposal.aux" 1474949312 1325 e5ae9d0fba9a5d8745b0c1612bb02fc7 ""
-  "cs294_proposal.bbl" 1474949126 1528 244cd2ec1113c6a0543fba79108d92aa "bibtex cs294_proposal"
-  "cs294_proposal.out" 1474949312 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "cs294_proposal.tex" 1474949311 8744 8816696378fca7657ecdc951349e11fe ""
+  "cs294_proposal.aux" 1474949689 1325 e5ae9d0fba9a5d8745b0c1612bb02fc7 ""
+  "cs294_proposal.bbl" 1474949492 1528 244cd2ec1113c6a0543fba79108d92aa "bibtex cs294_proposal"
+  "cs294_proposal.out" 1474949689 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "cs294_proposal.tex" 1474949688 8655 0456c8070de0dc2ee79e79be26f5ec1e ""
   (generated)
-  "cs294_proposal.aux"
+  "cs294_proposal.log"
   "cs294_proposal.out"
   "cs294_proposal.pdf"
-  "cs294_proposal.log"
+  "cs294_proposal.aux"

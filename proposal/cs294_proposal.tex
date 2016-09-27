@@ -115,15 +115,15 @@
 
 \section*{Problem statement and background}
 
-We would like to focus on generative models for tasks in the sequential data setting, with an emphasis on variational auto-encoders (VAEs).  First, we plan to start from implementing existing models which incorporates VAE into the sequential data. For example, VAE ideas are incorporated into recurrent neural network (RNN) applications to generate sequential data like speech and handwriting. (Gregor et al. and Chung et al. 2015) Then we would like to investigate whether we can improve the current methods, for example, by borrowing ideas from another popular generative model:  generative adversarial nets (GANs). We may also design new variants/generalizations of VAEs in the hope of overcoming the drawbacks of the popular VAE model (detailed below).
+We would like to focus on generative models for tasks in the sequential data setting, with an emphasis on variational auto-encoders (VAEs).  First, we plan to start from implementing existing models which incorporates VAE into the sequential data. For example, VAE ideas are incorporated into recurrent neural network (RNN) applications to generate sequential data. Then we would like to investigate whether we can improve the current methods, for example, by borrowing ideas from another popular generative model:  generative adversarial nets (GANs). We may also design new variants/generalizations of VAEs in the hope of overcoming the drawbacks of the popular VAE model (detailed below).
 
 \subsection*{Replication}
 
-First, we would like to implement several variational auto encoders using TensorFlow in order to familiarize ourselves with the framework and the workflow. Concretely, we would like to implement the Auto-encoding Variational Bayes model as proposed in \cite{kingma2013auto}, which trains it on the images from the MNIST and Frey Face datasets. We also will combine VAEs with RNNs on sequential data that generates speech and handwriting, proposed by \cite{gregor2015draw} and \cite{chung2015recurrent} with the hope of improving the results by modifying the neural network structure in the model.
+First, we would like to implement several variational auto encoders using TensorFlow in order to familiarize ourselves with the framework. Concretely, we will implement the Auto-encoding Variational Bayes model as proposed in \cite{kingma2013auto}, which trains it on the images from the MNIST and Frey Face datasets. We also will combine VAEs with RNNs on sequential data that generates speech and handwriting, proposed by \cite{gregor2015draw} and \cite{chung2015recurrent} with the hope of improving the results by modifying the neural network structure in the model.
 
 \subsection*{Drawbacks of VAE and potential solutions}
 
-Below we list several of the potential problems of VAE and also draft our untested solutions. We hope to make these conjectured models more concrete, implement them on MNIST and Frey Face datasets, and see their effects when carrying out the project.
+Below we list several of the potential problems of VAE and also draft our untested solutions. We hope to make these conjectured models more concrete, implement them on the MNIST and Frey Face datasets, and see their effects when carrying out the project.
 
 \begin{itemize}
 \item Images generated from variational auto-encoders trained on images tend to be somewhat blurry. \cite{Goodfellow-et-al-2016-Book} On the other hand, GANs tend to produce sharp images but are difficult to train. We would like to investigate whether it is possible to incorporate adversarial ideas from GANs to sharpen the output of VAE generative models.
@@ -135,7 +135,6 @@ Following the work of \cite{gregor2015draw} and \cite{chung2015recurrent}, we ai
 
 \section*{Source of data}
 We will mainly use MNIST handwriting dataset and Frey Face datasets. We will also try to apply the model to CIFAR 10 and ImageNet.
-
 For the RNN applications, we will consider sequential datasets, like the Blizzard Challenge 2013 text-to-speech dataset and the IAM-OnDB handwriting dataset.
 
 \section*{Tools}
