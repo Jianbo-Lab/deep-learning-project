@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amsthm, amssymb, mathtools, thmtools, mathdots, tikz, mathrsfs}
 %\usepackage{enumerate} conflicts with enumitem
@@ -15,6 +15,7 @@
 %\setlength{\parskip}{5pt}
 \usepackage{indentfirst}
 \newcommand{\eat}[1]{}
+
 %\usetikzlibrary{positioning,matrix}
 
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=gray}
@@ -42,7 +43,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{CS 294 Project Proposal: Title Here}
+\title{CS 294 Project Proposal:\\Variational Auto-encoders with Applications to Sequential Data}
 \date{26 September 2016}
 \author{Project members: Jianbo Chen\quad Cheng Ju\quad Billy Fang}
 
@@ -114,15 +115,45 @@
 
 \section*{Problem statement and background}
 
+We would like to focus on generative models for tasks in the sequential data setting, with an emphasis on variational auto-encoders (VAEs).  First, we plan to start from implementing existing models which incorporates VAE into the sequential data. For example, VAE ideas are incorporated into recurrent neural network (RNN) applications to generate sequential data. Then we would like to investigate whether we can improve the current methods, for example, by borrowing ideas from another popular generative model:  generative adversarial nets (GANs). We may also design new variants/generalizations of VAEs in the hope of overcoming the drawbacks of the popular VAE model (detailed below).
+
+\subsection*{Replication}
+
+First, we would like to implement several variational auto encoders using TensorFlow in order to familiarize ourselves with the framework. Concretely, we will implement the Auto-encoding Variational Bayes model as proposed in \cite{kingma2013auto}, which trains it on the images from the MNIST and Frey Face datasets. We also will combine VAEs with RNNs on sequential data that generates speech and handwriting, proposed by \cite{gregor2015draw} and \cite{chung2015recurrent} with the hope of improving the results by modifying the neural network structure in the model.
+
+\subsection*{Drawbacks of VAE and potential solutions}
+
+Below we list several of the potential problems of VAE and also draft our untested solutions. We hope to make these conjectured models more concrete, implement them on the MNIST and Frey Face datasets, and see their effects when carrying out the project.
+
+\begin{itemize}
+\item Images generated from variational auto-encoders trained on images tend to be somewhat blurry. \cite{Goodfellow-et-al-2016-Book} On the other hand, GANs tend to produce sharp images but are difficult to train. We would like to investigate whether it is possible to incorporate adversarial ideas from GANs to sharpen the output of VAE generative models.
+\item Another troubling issue with contemporary VAE models is that they tend to use only a small subset of the dimensions of the latent variable $z$ \cite{Goodfellow-et-al-2016-Book}. This indicates that increasing the dimension of $z$ will not actually increase the effective expressiveness of the model. Rather than increasing the dimension of $z$, we consider more complicated graphical models. In particular, there are many hierarchical models that contain more complicated probabilistic structure and expressiveness than the vanilla VAE. Can we gain from adopting the expressive power of more complicated hierarchical models, while preserving the simplicity of inference/computation in the variational auto-encoder?
+\end{itemize}
+
+\section*{Applications}
+Following the work of \cite{gregor2015draw} and \cite{chung2015recurrent}, we aim to combine VAEs with RNNs to generate sequential data such as handwriting or speech. In the latter paper, Chung et al. argued that through the use of high-level latent random variables, the variational RNN (VRNN) can model the kind of variability observed in highly structured sequential data. Beyond being able to generate new sequential data, the success of these models lies in their ability to learn the features and processes that generated the observed data. By studying and improving these models, we hope to gain a better understanding of the essential components of speech and handwriting generation, and perform tasks like recovering missing data or predicting/completing a sequence of data. If time permits, we may consider other image generation tasks in general.
+
 \section*{Source of data}
+We will mainly use MNIST handwriting dataset and Frey Face datasets. We will also try to apply the model to CIFAR 10 and ImageNet.
+For the RNN applications, we will consider sequential datasets, like the Blizzard Challenge 2013 text-to-speech dataset and the IAM-OnDB handwriting dataset.
 
 \section*{Tools}
+We plan to implement the models in {TensorFlow}.
+For hardware, we plan to use GPUs from {Amazon AWS}.
+We may also refer to open source code, including the following.
+\begin{itemize}
+\item \url{https://github.com/ikostrikov/TensorFlow-VAE-GAN-DRAW}
+\item \url{https://github.com/ericjang/draw}
+\end{itemize}
 
 \section*{Evaluation}
 
+One natural approach is to evaluate a generative model using the log likelihood of test datasets.
+However, as argued in \cite{theis2015note}, a good log likelihood is neither necessary nor sufficient for producing plausible samples. We will thus consider other evaluation metrics like Parzen windows and visual evaluation of samples. Ultimately our choice of evaluation metric will depend on the particular application at hand.
 
-\begin{thebibliography}{9}
-\bibitem{test} John Smith. \textbf{Lorem ipsum.} 2020.
-\end{thebibliography}
+\bibliographystyle{plain}
+\bibliography{cs294_bib}
+
+\nocite{*}
 
 \end{document}
