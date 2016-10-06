@@ -49,10 +49,11 @@ B image denoising
 B1 VAE for image denoising: http://arxiv.org/pdf/1511.06406v2.pdf 
 B2 VAN: http://www.cc.gatech.edu/~hays/7476/projects/Avery_Wenchen/
 
+
 Vision tasks related to the above two tasks have been quite well intestigated. What about sounds? Can we discriminate speech from noise? (though I believe it's also been investigated) Further, what about the universe? For example, in the study of cosmic microwave background. For example, can we find aliens from noisy data received from the universe? 
  
 Other random ideas:
-Cons and Pros: VAE suffers from generating blurry images while VANs are more difficult to optimize due to unstable training dynamics. Combine them in a certain way?  
+Cons and Pros: VAE suffers from generating blurry images while GANs are more difficult to optimize due to unstable training dynamics. Combine them in a certain way?  
 
 Improving the flexibility of VAE: http://arxiv.org/abs/1606.04934
 Can we design our own model based on the above paper, or beyond the above paper?
