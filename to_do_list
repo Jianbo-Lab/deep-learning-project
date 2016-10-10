@@ -5,3 +5,5 @@
 Try batch normalization;
 Try convnets;
 Try conditional VAE.
+
+One question to think about: When trying out covnet, where should we put conv layers and where should we put fully connected layers?
