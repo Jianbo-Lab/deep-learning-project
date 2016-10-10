@@ -20,6 +20,8 @@ https://github.com/darksigma/Fundamentals-of-Deep-Learning-Book
 This is tensorflow implementation of VAE.
 https://github.com/oduerr/dl_tutorial/blob/master/tensorflow/vae/
 vae_demo.ipynb
+Here is a short script for VAE:
+https://github.com/y0ast/VAE-TensorFlow/blob/master/main.py
 This is another:
 https://jmetzen.github.io/2015-11-27/vae.html
 
