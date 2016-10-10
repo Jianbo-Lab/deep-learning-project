@@ -1,3 +1,7 @@
 1. Finish assignment3 prob1,2
 2. Read codes from TensorFlow tutorials of your interets: https://www.tensorflow.org/versions/r0.11/tutorials/index.html
 3. Read the implementation of VAE in TensorFlow here: https://jmetzen.github.io/2015-11-27/vae.html
+4. Improvements: 
+Try batch normalization;
+Try convnets;
+Try conditional VAE.
