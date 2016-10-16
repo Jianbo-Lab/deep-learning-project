@@ -5,24 +5,24 @@ import time
 
 class Variational_Autoencoder():
     def __init__(self, sess, build_encoder, build_decoder,
-    	batch_size = 100,z_dim = 20,img_dim = 784,dataset = 'mnist',
-    	learning_rate = 0.001,num_epochs = 5):
+    	batch_size = 100, z_dim = 20, img_dim = 784, dataset = 'mnist',
+    	learning_rate = 0.001, num_epochs = 5):
         """
         Inputs:
         sess: TensorFlow session.
-        build_encoder: A function that layes down the computational 
+        build_encoder: A function that lays down the computational
         graph for the encoder.
-        build_decoder: A function that layes down the computational 
+        build_decoder: A function that lays down the computational
         graph for the decoder.
         batch_size: The number of samples in each batch.
         z_dim: the dimension of z.
-        img_dim: the dimension of an image. 
+        img_dim: the dimension of an image.
         (Currently, we only consider 28*28 = 784.)
-        dataset: The filename of the dataset. 
+        dataset: The filename of the dataset.
         (Currently we only consider mnist.)
-        learning_rate: The learning rate of the Adam optimizer. 
+        learning_rate: The learning rate of the Adam optimizer.
         num_epochs: The number of epochs.
-        
+
         """
         self.sess = sess
         self.build_encoder = build_encoder
@@ -33,12 +33,12 @@ class Variational_Autoencoder():
         self.learning_rate = learning_rate
         self.dataset = dataset
         self.num_epochs = num_epochs
-        
+
         if dataset == 'mnist':
-            # Load MNIST data in a format suited for tensorflow. 
+            # Load MNIST data in a format suited for tensorflow.
             self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
             self.n_samples = self.mnist.train.num_examples
-        
+
     def train(self):
         """ Train VAE for a number of steps."""
         global_step = tf.Variable(0, trainable = False)
@@ -47,16 +47,16 @@ class Variational_Autoencoder():
 
         # Compute the objective function.
         loss = self.build_vae()
-         
-        
-        # Build a graph that trains the model with one batch of examples 
+
+
+        # Build a graph that trains the model with one batch of examples
         # and updates the model parameters.
-        optimum = tf.train.AdamOptimizer(self.learning_rate).minimize(loss)
+        optimum = tf.train.AdamOptimizer(self.learning_rate).minimize(loss, global_step=global_step)
 
         # Build an initialization operation to run.
         init = tf.initialize_all_variables()
         self.sess.run(init)
- 
+
         num_batchs = int(self.n_samples / self.batch_size)
 
         for epoch in xrange(self.num_epochs):
@@ -81,9 +81,10 @@ class Variational_Autoencoder():
 
             # Later we'll add summary and log files to record training procedures.
             # For now, we will satisfy with naive printing.
-            print 'Epoch {}: The loss is {}.'.format(epoch + 1,
-                                                            avg_loss_value)
-                    
+            print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
+        saver = tf.train.Saver()
+        saver.save(self.sess, 'checkpoint', global_step = epoch)
+
     def input(self):
         """
         This function reads in one batch of data.
@@ -91,9 +92,9 @@ class Variational_Autoencoder():
         if self.dataset == 'mnist':
             # Extract images and labels (currently useless) from the next batch.
             batch_images, _ = self.mnist.train.next_batch(self.batch_size)
-            
+
             return batch_images
-            
+
     def build_vae(self):
         """
         This function builds up VAE from encoder and decoder function
@@ -102,44 +103,43 @@ class Variational_Autoencoder():
         # Add a placeholder for one batch of images
         self.images = tf.placeholder(tf.float32,[self.batch_size,self.img_dim],
                                     name = 'images')
-         
+
         # Create a placeholder for eps.
-        self.batch_eps = tf.placeholder(tf.float32,[self.batch_size,self.z_dim],name = 'eps') 
+        self.batch_eps = tf.placeholder(tf.float32,[self.batch_size,self.z_dim],name = 'eps')
         # Construct the mean and the variance of q(z|x).
-        self.encoder_mean,self.encoder_log_sigma2 = \
-        self.build_encoder(self.images,self.z_dim) 
+        self.encoder_mean, self.encoder_log_sigma2 = \
+            self.build_encoder(self.images,self.z_dim)
         # Compute z from eps and z_mean, z_sigma2.
         self.batch_z = tf.add(self.encoder_mean, \
-                        tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma2)), self.batch_eps)) 
+                        tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma2)), self.batch_eps))
         # Construct the mean of the Bernoulli distribution p(x|z).
-        self.decoder_mean = self.build_decoder(self.batch_z,self.img_dim) 
+        self.decoder_mean = self.build_decoder(self.batch_z,self.img_dim)
         # Compute the loss from decoder (empirically).
-        encoder_loss = \
-            -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean)
+        encoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) \
                            + (1 - self.images) * tf.log(1e-10 + 1 - self.decoder_mean),
                            1)
         # Compute the loss from encoder (analytically).
-        decoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2 
-                                           - tf.square(self.encoder_mean) 
+        decoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2
+                                           - tf.square(self.encoder_mean)
                                            - tf.exp(self.encoder_log_sigma2), 1)
-        
+
         # Add up to the cost.
-        self.cost = tf.reduce_mean(encoder_loss + decoder_loss) 
-        
+        self.cost = tf.reduce_mean(encoder_loss + decoder_loss)
+
         return self.cost
-    
+
     def generate(self,num = 10):
         """
         This function generates images from VAE.
         Input:
         num: The number of images we would like to generate from the VAE.
         """
-        
+
         # At the current stage, we require the number of images to
         # be generated smaller than the batch size for convenience.
         assert num <= self.batch_size, \
         "We require the number of images to be generated smaller than the batch size."
-        
+
         # Sample z from standard normals.
         sampled_z = np.random.randn(self.batch_size,self.z_dim)
 
