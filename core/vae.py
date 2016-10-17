@@ -6,7 +6,7 @@ import time
 class Variational_Autoencoder():
     def __init__(self, sess, build_encoder, build_decoder,
     	batch_size = 100, z_dim = 20, img_dim = 784, dataset = 'mnist',
-    	learning_rate = 0.001, num_epochs = 5):
+    	learning_rate = 0.001, num_epochs = 5,load = False,load_file = None):
         """
         Inputs:
         sess: TensorFlow session.
@@ -33,7 +33,9 @@ class Variational_Autoencoder():
         self.learning_rate = learning_rate
         self.dataset = dataset
         self.num_epochs = num_epochs
-
+        self.load = load
+        self.load_file = load_file
+        
         if dataset == 'mnist':
             # Load MNIST data in a format suited for tensorflow.
             self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
@@ -55,36 +57,39 @@ class Variational_Autoencoder():
         # Build an initialization operation to run.
         init = tf.initialize_all_variables()
         self.sess.run(init)
+        if self.load:
+            self.saver = tf.train.Saver()
+            self.saver.restore(self.sess, self.load_file)
+        else:
+            num_batches = int(self.n_samples / self.batch_size)
 
-        num_batches = int(self.n_samples / self.batch_size)
+            for epoch in xrange(self.num_epochs):
 
-        for epoch in xrange(self.num_epochs):
+                avg_loss_value = 0.
 
-            avg_loss_value = 0.
+                for b in xrange(num_batches):
+                    # Get images from the mnist dataset.
+                    batch_images = self.input()
 
-            for b in xrange(num_batches):
-                # Get images from the mnist dataset.
-                batch_images = self.input()
+                    # Sample a batch of eps from standard normal distribution.
+                    batch_eps = np.random.randn(self.batch_size,self.z_dim)
 
-                # Sample a batch of eps from standard normal distribution.
-                batch_eps = np.random.randn(self.batch_size,self.z_dim)
+                    # Run a step of adam optimization and loss computation.
+                    start_time = time.time()
+                    _, loss_value = self.sess.run([optimum,loss],
+                                            feed_dict = {self.images: batch_images,
+                                                        self.batch_eps: batch_eps})
+                    duration = time.time() - start_time
 
-                # Run a step of adam optimization and loss computation.
-                start_time = time.time()
-                _, loss_value = self.sess.run([optimum,loss],
-                                        feed_dict = {self.images: batch_images,
-                                                    self.batch_eps: batch_eps})
-                duration = time.time() - start_time
+                    #assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
-                #assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
+                    avg_loss_value += loss_value / self.n_samples * self.batch_size
 
-                avg_loss_value += loss_value / self.n_samples * self.batch_size
-
-            # Later we'll add summary and log files to record training procedures.
-            # For now, we will satisfy with naive printing.
-            print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
-        saver = tf.train.Saver()
-        saver.save(self.sess, 'vae_checkpoint', global_step = epoch)
+                # Later we'll add summary and log files to record training procedures.
+                # For now, we will satisfy with naive printing.
+                print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value) 
+            self.saver = tf.train.Saver()
+            self.saver.save(self.sess, 'vae_checkpoint', global_step = epoch)
 
     def input(self):
         """
@@ -129,7 +134,7 @@ class Variational_Autoencoder():
 
         return self.cost
 
-    def generate(self,num = 10):
+    def generate(self,num = 10,load = False,filename = None):
         """
         This function generates images from VAE.
         Input:
@@ -143,8 +148,7 @@ class Variational_Autoencoder():
 
         # Sample z from standard normals.
         sampled_z = np.random.randn(self.batch_size,self.z_dim)
-
-        return self.sess.run(self.decoder_mean,
-                      feed_dict = {self.batch_z:sampled_z})
-
+        
+        return self.sess.run(self.decoder_mean,\
+                      feed_dict = {self.batch_z:sampled_z}) 
 
