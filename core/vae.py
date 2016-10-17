@@ -2,11 +2,12 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import time
+from misc_ops import *
 
 class Variational_Autoencoder():
     def __init__(self, sess, build_encoder, build_decoder,
     	batch_size = 100, z_dim = 20, img_dim = 784, dataset = 'mnist',
-    	learning_rate = 0.001, num_epochs = 5):
+    	learning_rate = 0.001, num_epochs = 5, is_conditional = False):
         """
         Inputs:
         sess: TensorFlow session.
@@ -29,10 +30,12 @@ class Variational_Autoencoder():
         self.build_decoder = build_decoder
         self.z_dim = z_dim
         self.img_dim = img_dim
+        self.img_height = int(np.sqrt(img_dim))
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.dataset = dataset
         self.num_epochs = num_epochs
+        self.is_conditional = is_conditional
 
         if dataset == 'mnist':
             # Load MNIST data in a format suited for tensorflow.
@@ -64,15 +67,22 @@ class Variational_Autoencoder():
 
             for b in xrange(num_batches):
                 # Get images from the mnist dataset.
-                batch_images = self.input()
+                batch_images, batch_cols = self.input()
 
                 # Sample a batch of eps from standard normal distribution.
                 batch_eps = np.random.randn(self.batch_size,self.z_dim)
 
                 # Run a step of adam optimization and loss computation.
                 start_time = time.time()
-                _, loss_value = self.sess.run([optimum,loss],
+
+                if not self.is_conditional:
+                    _, loss_value = self.sess.run([optimum,loss],
                                         feed_dict = {self.images: batch_images,
+                                                    self.batch_eps: batch_eps})
+                else:
+                    _, loss_value = self.sess.run([optimum,loss],
+                                        feed_dict = {self.images: batch_images,
+                                                    self.batch_cols: batch_cols,
                                                     self.batch_eps: batch_eps})
                 duration = time.time() - start_time
 
@@ -84,7 +94,11 @@ class Variational_Autoencoder():
             # For now, we will satisfy with naive printing.
             print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
         saver = tf.train.Saver()
-        saver.save(self.sess, 'vae_checkpoint', global_step = epoch)
+        if not self.is_conditional:
+            saver.save(self.sess, 'vae_checkpoint', global_step = epoch)
+        else:
+            saver.save(self.sess, 'cvae_checkpoint', global_step = epoch)
+
 
     def input(self):
         """
@@ -94,7 +108,13 @@ class Variational_Autoencoder():
             # Extract images and labels (currently useless) from the next batch.
             batch_images, _ = self.mnist.train.next_batch(self.batch_size)
 
-            return batch_images
+
+            if self.is_conditional:
+                batch_cols = get_middle_column(batch_images)
+            else:
+                batch_cols = None
+
+            return batch_images, batch_cols
 
     def build_vae(self):
         """
@@ -102,25 +122,47 @@ class Variational_Autoencoder():
         in the global environment.
         """
         # Add a placeholder for one batch of images
-        self.images = tf.placeholder(tf.float32,[self.batch_size,self.img_dim],
-                                    name = 'images')
+        self.images = tf.placeholder(tf.float32,[self.batch_size, self.img_dim], name = 'images')
+
+        # placeholder for cols in CVAE
+        if self.is_conditional:
+            self.batch_cols = tf.placeholder(tf.float32,[self.batch_size, self.img_height], name='cols')
 
         # Create a placeholder for eps.
         self.batch_eps = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps')
+
+
         # Construct the mean and the variance of q(z|x).
-        self.encoder_mean, self.encoder_log_sigma2 = \
-            self.build_encoder(self.images, self.z_dim)
+        if not self.is_conditional:
+            self.encoder_mean, self.encoder_log_sigma2 = self.build_encoder(
+                self.images,
+                self.z_dim)
+        else:
+            self.encoder_mean, self.encoder_log_sigma2 = self.build_encoder(
+                tf.concat(1, (self.images, self.batch_cols)),
+                self.z_dim)
+
+
         # Compute z from eps and z_mean, z_sigma2.
-        self.batch_z = tf.add(self.encoder_mean, \
-                        tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma2)), self.batch_eps))
+        self.batch_z = tf.add(self.encoder_mean, tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma2)), self.batch_eps))
+
+
+
+
         # Construct the mean of the Bernoulli distribution p(x|z).
-        self.decoder_mean = self.build_decoder(self.batch_z,self.img_dim)
+        if not self.is_conditional:
+            self.decoder_mean = self.build_decoder(self.batch_z,
+                self.img_dim)
+        else:
+            self.decoder_mean = self.build_decoder(tf.concat(1, (self.batch_z, self.batch_cols)),
+                self.img_dim)
+
         # Compute the loss from decoder (empirically).
-        encoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) \
+        decoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) \
                            + (1 - self.images) * tf.log(1e-10 + 1 - self.decoder_mean),
                            1)
         # Compute the loss from encoder (analytically).
-        decoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2
+        encoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2
                                            - tf.square(self.encoder_mean)
                                            - tf.exp(self.encoder_log_sigma2), 1)
 
@@ -129,7 +171,7 @@ class Variational_Autoencoder():
 
         return self.cost
 
-    def generate(self,num = 10):
+    def generate(self, num = 10, cols = None):
         """
         This function generates images from VAE.
         Input:
@@ -144,7 +186,13 @@ class Variational_Autoencoder():
         # Sample z from standard normals.
         sampled_z = np.random.randn(self.batch_size,self.z_dim)
 
-        return self.sess.run(self.decoder_mean,
-                      feed_dict = {self.batch_z:sampled_z})
+        if not self.is_conditional:
+            return self.sess.run(self.decoder_mean,
+                      feed_dict = {self.batch_z: sampled_z})
+        else:
+            if cols is None:
+                _, cols = self.input()
+            return self.sess.run(self.decoder_mean,
+                      feed_dict = {self.batch_z: sampled_z, self.batch_cols: cols})
 
 
