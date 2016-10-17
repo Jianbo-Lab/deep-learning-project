@@ -116,11 +116,11 @@ class Variational_Autoencoder():
         # Construct the mean of the Bernoulli distribution p(x|z).
         self.decoder_mean = self.build_decoder(self.batch_z,self.img_dim)
         # Compute the loss from decoder (empirically).
-        encoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) \
+        decoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) \
                            + (1 - self.images) * tf.log(1e-10 + 1 - self.decoder_mean),
                            1)
         # Compute the loss from encoder (analytically).
-        decoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2
+        encoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2
                                            - tf.square(self.encoder_mean)
                                            - tf.exp(self.encoder_log_sigma2), 1)
 
