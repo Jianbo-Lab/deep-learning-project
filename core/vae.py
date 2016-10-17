@@ -42,8 +42,7 @@ class Variational_Autoencoder():
     def train(self):
         """ Train VAE for a number of steps."""
         global_step = tf.Variable(0, trainable = False)
-        # Get images from the mnist dataset.
-        batch_images = self.input()
+
 
         # Compute the objective function.
         loss = self.build_vae()
@@ -57,13 +56,15 @@ class Variational_Autoencoder():
         init = tf.initialize_all_variables()
         self.sess.run(init)
 
-        num_batchs = int(self.n_samples / self.batch_size)
+        num_batches = int(self.n_samples / self.batch_size)
 
         for epoch in xrange(self.num_epochs):
 
             avg_loss_value = 0.
 
-            for b in xrange(num_batchs):
+            for b in xrange(num_batches):
+                # Get images from the mnist dataset.
+                batch_images = self.input()
 
                 # Sample a batch of eps from standard normal distribution.
                 batch_eps = np.random.randn(self.batch_size,self.z_dim)
