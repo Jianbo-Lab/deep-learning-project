@@ -3,7 +3,7 @@ import tensorflow as tf
 from ops import *
 hidden_dim = 100
 
-def build_encoder(images,z_dim):
+def build_encoder(images, z_dim):
     """
     The probabilistic encoder which computes the mean and the log
     of variance of z drawn from the Gaussian distribution q(z|images).
@@ -27,7 +27,7 @@ def build_encoder(images,z_dim):
     return (z_mean, z_log_sigma_sq)
 
 
-def build_decoder(z,img_dim):
+def build_decoder(z, img_dim):
     """
     The probabilistic decoder which computes the mean of x drawn from
     the Bernoulli distribution p(x|z).

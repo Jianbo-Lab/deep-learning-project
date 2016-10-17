@@ -84,7 +84,7 @@ class Variational_Autoencoder():
             # For now, we will satisfy with naive printing.
             print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
         saver = tf.train.Saver()
-        saver.save(self.sess, 'checkpoint', global_step = epoch)
+        saver.save(self.sess, 'vae_checkpoint', global_step = epoch)
 
     def input(self):
         """
@@ -106,10 +106,10 @@ class Variational_Autoencoder():
                                     name = 'images')
 
         # Create a placeholder for eps.
-        self.batch_eps = tf.placeholder(tf.float32,[self.batch_size,self.z_dim],name = 'eps')
+        self.batch_eps = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps')
         # Construct the mean and the variance of q(z|x).
         self.encoder_mean, self.encoder_log_sigma2 = \
-            self.build_encoder(self.images,self.z_dim)
+            self.build_encoder(self.images, self.z_dim)
         # Compute z from eps and z_mean, z_sigma2.
         self.batch_z = tf.add(self.encoder_mean, \
                         tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma2)), self.batch_eps))
