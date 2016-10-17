@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from ops import *
 filter_dim = 32
-hidden_dim = 100
+hidden_dim = 20
 def build_encoder(images,z_dim):
     """
     The probabilistic encoder which computes the mean and the log 
