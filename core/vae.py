@@ -75,8 +75,7 @@ class Variational_Autoencoder():
         else:
             num_batches = int(self.n_samples / self.batch_size)
 
-            for epoch in xrange(self.num_epochs):
-
+            for epoch in xrange(self.num_epochs): 
                 avg_loss_value = 0.
 
                 for b in xrange(num_batches):

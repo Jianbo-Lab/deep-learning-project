@@ -6,7 +6,7 @@ class Encoder:
     def __init__(self, hidden_dim = 100): 
         self.hidden_dim = hidden_dim
 
-    def build_encoder(self, images, z_dim):
+    def __call__(self, images, z_dim):
         """
         The probabilistic encoder which computes the mean and the log
         of variance of z drawn from the Gaussian distribution q(z|images).
@@ -33,7 +33,7 @@ class Decoder:
     def __init__(self, hidden_dim = 100):
         self.hidden_dim = hidden_dim
 
-    def build_decoder(self, z, img_dim):
+    def __call__(self, z, img_dim):
         """
         The probabilistic decoder which computes the mean of x drawn from
         the Bernoulli distribution p(x|z).
