@@ -1,8 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from ops import *
-filter_dim = 32
-hidden_dim = 20
+from ops import * 
 class Encoder:
     def __init__(self,filter_dim = 32,hidden_dim = 20):
         self.filter_dim = filter_dim
@@ -82,7 +80,7 @@ class Decoder:
         s2, s4 = s, s#int(s/2), int(s/4) 
 
 
-        h0 = linear(z, filter_dim * 2 * s4 * s4, 'de_fc0')
+        h0 = linear(z, self.filter_dim * 2 * s4 * s4, 'de_fc0')
         h0 = tf.reshape(h0, [-1, s4, s4, self.filter_dim * 2])
         h0 = tf.nn.relu(bn0(h0))
 
