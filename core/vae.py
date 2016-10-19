@@ -2,11 +2,15 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import time
+import os
+
+ 
 
 class Variational_Autoencoder():
-    def __init__(self, sess, build_encoder, build_decoder,
+    def __init__(self, sess, build_encoder, build_decoder, checkpoint_name = 'vae_checkpoint',
     	batch_size = 100, z_dim = 20, img_dim = 784, dataset = 'mnist',
-    	learning_rate = 0.001, num_epochs = 5,load = False,load_file = None):
+    	learning_rate = 0.001, num_epochs = 5,load = False,load_file = None,
+        checkpoint_dir = '../notebook/checkpoints/'):
         """
         Inputs:
         sess: TensorFlow session.
@@ -14,6 +18,7 @@ class Variational_Autoencoder():
         graph for the encoder.
         build_decoder: A function that lays down the computational
         graph for the decoder.
+        checkpoint_name: The name of the checkpoint file to be saved.
         batch_size: The number of samples in each batch.
         z_dim: the dimension of z.
         img_dim: the dimension of an image.
@@ -27,6 +32,7 @@ class Variational_Autoencoder():
         self.sess = sess
         self.build_encoder = build_encoder
         self.build_decoder = build_decoder
+        self.checkpoint_name = checkpoint_name
         self.z_dim = z_dim
         self.img_dim = img_dim
         self.batch_size = batch_size
@@ -35,11 +41,17 @@ class Variational_Autoencoder():
         self.num_epochs = num_epochs
         self.load = load
         self.load_file = load_file
-        
-        if dataset == 'mnist':
+        self.checkpoint_dir = checkpoint_dir
+        # if dataset == 'mnist':
+        #     # Load MNIST data in a format suited for tensorflow.
+        #     self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+        #     self.n_samples = self.mnist.train.num_examples
+        if dataset == 'mnist' and load == False:
             # Load MNIST data in a format suited for tensorflow.
             self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
             self.n_samples = self.mnist.train.num_examples
+        if load:
+            self.train()
 
     def train(self):
         """ Train VAE for a number of steps."""
@@ -88,8 +100,12 @@ class Variational_Autoencoder():
                 # Later we'll add summary and log files to record training procedures.
                 # For now, we will satisfy with naive printing.
                 print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value) 
-            self.saver = tf.train.Saver()
-            self.saver.save(self.sess, 'vae_checkpoint', global_step = epoch)
+            self.save(epoch)
+
+    def save(self,epoch):
+        self.saver = tf.train.Saver()
+        self.saver.save(self.sess, os.path.join(self.checkpoint_dir, 
+            self.checkpoint_name), global_step = epoch)
 
     def input(self):
         """
