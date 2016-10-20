@@ -6,8 +6,8 @@ from misc_ops import *
 
 class Conditional_Variational_Autoencoder():
     def __init__(self, sess, build_encoder, build_decoder,
-    	batch_size = 100, z_dim = 20, img_dim = 784, dataset = 'mnist',
-    	learning_rate = 0.001, num_epochs = 5):
+        batch_size = 100, z_dim = 20, img_dim = 784, dataset = 'mnist',
+        learning_rate = 0.001, num_epochs = 5):
         """
         Inputs:
         sess: TensorFlow session.
