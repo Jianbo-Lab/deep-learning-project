@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 model_checkpoint_path: "vae_checkpoint_lr_0.005_filter_dim_32_hidden_dim_20-0"
 all_model_checkpoint_paths: "vae_checkpoint_lr_0.005_filter_dim_32_hidden_dim_20-0"
+=======
+model_checkpoint_path: "cvae_label_checkpoint"
+all_model_checkpoint_paths: "cvae_label_checkpoint"
+>>>>>>> f44634a426e91f0fbedc8935359ea014af71b66c
