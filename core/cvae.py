@@ -7,8 +7,9 @@ from misc_ops import *
 
 class Conditional_Variational_Autoencoder():
     def __init__(self, sess, build_encoder, build_decoder,
+        dataset,
         checkpoint_name = 'cvae_checkpoint',
-        batch_size = 100, z_dim = 20, img_dim = 784, dataset = 'mnist',
+        batch_size = 100, z_dim = 20, img_dim = 784, #dataset = 'mnist',
         learning_rate = 0.001, num_epochs = 5,
         condition_on_label = False, get_cond_info = None, cond_info_dim = 784,
         load=False, load_file = None, checkpoint_dir = './checkpoints/'):
@@ -56,10 +57,12 @@ class Conditional_Variational_Autoencoder():
             self.cond_info_dim = 10
 
 
-        if dataset == 'mnist' and load == False:
+        #if dataset == 'mnist' and load == False:
             # Load MNIST data in a format suited for tensorflow.
-            self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-            self.n_samples = self.mnist.train.num_examples
+            #self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+            #self.n_samples = self.mnist.train.num_examples
+        self.n_samples = dataset.num_examples
+
         if load:
             self.train()
 
@@ -129,18 +132,25 @@ class Conditional_Variational_Autoencoder():
         """
         This function reads in one batch of data.
         """
-        if self.dataset == 'mnist':
+        batch_images, batch_labels = self.dataset.next_batch(self.batch_size)
+        if self.condition_on_label:
+            batch_info = batch_labels
+        else:
+            batch_info = self.get_cond_info(batch_images)
+        return batch_images, batch_info
+
+        #if self.dataset == 'mnist':
             # Extract images and labels (currently useless) from the next batch.
-            batch_images, batch_labels = self.mnist.train.next_batch(self.batch_size)
+            #batch_images, batch_labels = self.mnist.train.next_batch(self.batch_size)
 
 
-            #batch_cols = get_middle_column(batch_images)
-            if self.condition_on_label:
-                batch_info = batch_labels
-            else:
-                batch_info = self.get_cond_info(batch_images)
 
-            return batch_images, batch_info
+            #if self.condition_on_label:
+                #batch_info = batch_labels
+            #else:
+                #batch_info = self.get_cond_info(batch_images)
+
+            #return batch_images, batch_info
 
     def build_vae(self):
         """
