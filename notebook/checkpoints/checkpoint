@@ -1,0 +1,2 @@
+model_checkpoint_path: "vae_checkpoint_lr_0.005_filter_dim_32_hidden_dim_20-0"
+all_model_checkpoint_paths: "vae_checkpoint_lr_0.005_filter_dim_32_hidden_dim_20-0"
