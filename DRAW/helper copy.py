@@ -62,18 +62,18 @@ def read_attn(x,x_hat,h_dec_prev, A, B, read_n, DO_SHARE, eps):
 
 # Q sample
 
-def sampleQ(h_enc, reuse, batch_size, z_size):
+def sampleQ(h_enc, reuse, batch_size, z_size, batch_eps_t):
     """
     Samples Zt ~ normrnd(mu,sigma) via reparameterization trick for normal dist
     mu is (batch,z_size)
     """
-    e = tf.random_normal([batch_size, z_size])
-
+    e = batch_eps_t
     with tf.variable_scope("mu",reuse = reuse):
         mu=linear(h_enc, z_size)
     with tf.variable_scope("sigma",reuse = reuse):
         logsigma=linear(h_enc, z_size)
         sigma=tf.exp(logsigma)
+    print mu
     return (mu + sigma*e, mu, logsigma, sigma)
             
 
@@ -95,6 +95,5 @@ def write_attn(h_dec, reuse, write_n, A, B, eps, batch_size):
         wr = tf.reshape(wr,[batch_size, B * A])
         #gamma=tf.tile(gamma,[1,B*A])
         return wr * tf.reshape(1.0/gamma,[-1,1])
-
 
        
