@@ -9,17 +9,20 @@ from helper import *
 
 class DRAW():
 
-    def __init__(self, sess, build_encoder, build_decoder, read_attn = False, write_attn = False, T = 10, train_iters = 100, batch_size = 100):
+    def __init__(self, sess, build_encoder, build_decoder, read_attn = False, write_attn = False, T = 10, train_iters = 1000, batch_size = 100, print_itrs = 1000, learning_rate = 1e-4):
         self.sess = sess
 
         self.build_encoder = build_encoder
         self.build_decoder = build_decoder
+
+    
 
 
         self.DO_SHARE = None # workaround for variable_scope(reuse=True)
         self.data_dir = ""
         self.read_attn = read_attn
         self.write_attn = write_attn
+        self.print_itrs = print_itrs 
 
         # Currently I just fix all the tuning parameters. Could be given as input arguments.
         ## MODEL PARAMETERS ##
@@ -36,7 +39,7 @@ class DRAW():
         self.T = T # MNIST generation sequence length
         self.batch_size=100 # training minibatch size
         self.train_iters = train_iters
-        self.learning_rate=1e-3 # learning rate for optimizer
+        self.learning_rate= learning_rate # learning rate for optimizer
         self.eps=1e-8 # epsilon for numerical stability
         
         ## BUILD MODEL ## 
@@ -55,13 +58,13 @@ class DRAW():
 
         ## OPTIMIZER ## 
         
-        optimizer=tf.train.AdamOptimizer(self.learning_rate, beta1=0.5)
+        optimizer=tf.train.AdamOptimizer(self.learning_rate, beta1 = 0.5)
         grads=optimizer.compute_gradients(cost)
 
         for i,(g,v) in enumerate(grads):
             if g is not None:
                 grads[i]=(tf.clip_by_norm(g,5),v) # clip gradients
-        train_op=optimizer.apply_gradients(grads)
+        train_op = optimizer.apply_gradients(grads)
                 
         ## RUN TRAINING ## 
 
@@ -93,7 +96,7 @@ class DRAW():
 
 	    results = sess.run(fetches, self.feed_dict)
 	    self.Lxs[i], self.Lzs[i], _ = results
-	    if i % 100 == 0:
+	    if i % self.print_itrs  == 0:
 		print("iter=%d : Lx: %f Lz: %f" % (i, self.Lxs[i], self.Lzs[i]))
 
         self.saver = tf.train.Saver()
@@ -102,6 +105,9 @@ class DRAW():
 
     def inference(self):
 
+        # This function input a set of images
+        # Return the drawed images during training.
+        # Future work: I am working on generating image without input image, but have some issues with placeholder. So currently I made this compromising.
         canvases = self.sess.run(self.cs, self.feed_dict) # generate some examples
         canvases = np.array(canvases) # T x batch x img_size
         return canvases
