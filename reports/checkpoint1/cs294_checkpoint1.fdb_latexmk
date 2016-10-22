@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex cs294_checkpoint1"] 1477109905 "cs294_checkpoint1.aux" "cs294_checkpoint1.bbl" "cs294_checkpoint1" 1477109908
+["bibtex cs294_checkpoint1"] 1477110091 "cs294_checkpoint1.aux" "cs294_checkpoint1.bbl" "cs294_checkpoint1" 1477110156
   "/usr/local/texlive/2014/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
   "cs294_bib.bib" 1477107198 2287 e8747326f3ee7f1bf1bacaf0d425ebf8 ""
-  "cs294_checkpoint1.aux" 1477109907 1633 f3ea79f8717d1465da607c36272db8e8 ""
+  "cs294_checkpoint1.aux" 1477110155 1633 e659f946e14856117811130e1bf49961 ""
   "cs294_checkpoint1.bcf" 0 -1 0 ""
   (generated)
   "cs294_checkpoint1.blg"
   "cs294_checkpoint1.bbl"
-["pdflatex"] 1477109906 "cs294_checkpoint1.tex" "cs294_checkpoint1.pdf" "cs294_checkpoint1" 1477109908
+["pdflatex"] 1477110154 "cs294_checkpoint1.tex" "cs294_checkpoint1.pdf" "cs294_checkpoint1" 1477110156
   "/usr/local/texlive/2014/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2014/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2014/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -177,15 +177,15 @@
   "/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1401025944 1445653 26a0aacf3d70032b1ec192e8c7792117 ""
   "/usr/local/texlive/2014/texmf-var/web2c/pdftex/pdflatex.fmt" 1401025990 3832012 904d82bdcc8abf2b1cd296990b82553b ""
   "/usr/local/texlive/2014/texmf.cnf" 1401025936 577 a59edbde8d3a8c549d0eeaab1739e2ff ""
-  "cs294_checkpoint1.aux" 1477109907 1633 f3ea79f8717d1465da607c36272db8e8 ""
-  "cs294_checkpoint1.bbl" 1477109906 815 3195bec37c142ba6ff1896a9c59305f7 "bibtex cs294_checkpoint1"
-  "cs294_checkpoint1.out" 1477109906 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "cs294_checkpoint1.tex" 1477109901 9779 ee6f8135b3c8e35725f7889c57171850 ""
+  "cs294_checkpoint1.aux" 1477110155 1633 e659f946e14856117811130e1bf49961 ""
+  "cs294_checkpoint1.bbl" 1477110092 815 3195bec37c142ba6ff1896a9c59305f7 "bibtex cs294_checkpoint1"
+  "cs294_checkpoint1.out" 1477110155 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "cs294_checkpoint1.tex" 1477110154 10108 28f603aef36771a0c07cc4e8c4e13a11 ""
   "img/by_label.png" 1477103521 151616 e548b8cfedf33bdbb9e837a54d754dbf ""
   "img/fcvae.png" 1477089230 1019942 0fd37634208621d5ad1760fed02c83ca ""
   "img/left_half.png" 1477103514 99114 cce7a4b05343e621d543b736bd8dd182 ""
   (generated)
+  "cs294_checkpoint1.out"
+  "cs294_checkpoint1.log"
   "cs294_checkpoint1.pdf"
   "cs294_checkpoint1.aux"
-  "cs294_checkpoint1.log"
-  "cs294_checkpoint1.out"
