@@ -4,11 +4,11 @@
 import numpy as np
 import tensorflow as tf
 
-def linear(input_, output_size, scope=None, 
-           bias_start=0.0, with_w=False):
+def linear(input_, output_size, scope=None,
+           bias_start=0.0, with_w=False, reuse=None):
     shape = input_.get_shape().as_list()
 
-    with tf.variable_scope(scope,reuse = None):
+    with tf.variable_scope(scope,reuse = reuse):
         matrix = tf.get_variable("weights", [shape[1], output_size], tf.float32,
                                  tf.random_normal_initializer(stddev=1 / np.sqrt(shape[1])))
         bias = tf.get_variable("bias", [output_size],
@@ -18,7 +18,7 @@ def linear(input_, output_size, scope=None,
         else:
             return tf.matmul(input_, matrix) + bias
 
-def conv2d(input_, output_dim, 
+def conv2d(input_, output_dim,
            k_h=3, k_w=3, d_h=1, d_w=1, stddev=0.02,
            name="conv2d"):
     with tf.variable_scope(name):
@@ -38,10 +38,10 @@ def deconv2d(input_, output_shape,
         # filter : [height, width, output_channels, in_channels]
         w = tf.get_variable('w', [k_h, k_w, output_shape[-1], input_.get_shape()[-1]],
                             initializer=tf.random_normal_initializer(stddev=stddev))
-        
+
         deconv = tf.nn.conv2d_transpose(input_, w, output_shape=output_shape,
                                 strides=[1, d_h, d_w, 1])
- 
+
 
         biases = tf.get_variable('biases', [output_shape[-1]], initializer=tf.constant_initializer(0.0))
         deconv = tf.reshape(tf.nn.bias_add(deconv, biases), deconv.get_shape())
@@ -50,7 +50,7 @@ def deconv2d(input_, output_shape,
             return deconv, w, biases
         else:
             return deconv
-       
+
 
 def lrelu(x, leak=0.2, name="lrelu"):
   return tf.maximum(x, leak*x)
@@ -73,12 +73,12 @@ class batch_norm(object):
                                     initializer=tf.constant_initializer(0.))
                 self.gamma = tf.get_variable("gamma", [shape[-1]],
                                     initializer=tf.random_normal_initializer(1., 0.02))
-                
+
                 try:
                     batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
                 except:
                     batch_mean, batch_var = tf.nn.moments(x, [0, 1], name='moments')
-                    
+
                 ema_apply_op = self.ema.apply([batch_mean, batch_var])
                 self.ema_mean, self.ema_var = self.ema.average(batch_mean), self.ema.average(batch_var)
 

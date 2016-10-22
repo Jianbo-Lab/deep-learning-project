@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+
+\bibitem{doersch2016tutorial}
+Carl Doersch.
+\newblock Tutorial on variational autoencoders.
+\newblock {\em arXiv preprint arXiv:1606.05908}, 2016.
+
+\bibitem{gregor2015draw}
+Karol Gregor, Ivo Danihelka, Alex Graves, Danilo~Jimenez Rezende, and Daan
+  Wierstra.
+\newblock Draw: A recurrent neural network for image generation.
+\newblock {\em arXiv preprint arXiv:1502.04623}, 2015.
+
+\bibitem{DBLP:journals/corr/KingmaRMW14}
+Diederik~P. Kingma, Danilo~Jimenez Rezende, Shakir Mohamed, and Max Welling.
+\newblock Semi-supervised learning with deep generative models.
+\newblock {\em CoRR}, abs/1406.5298, 2014.
+
+\bibitem{kingma2013auto}
+Diederik~P Kingma and Max Welling.
+\newblock Auto-encoding variational bayes.
+\newblock {\em arXiv preprint arXiv:1312.6114}, 2013.
+
+\end{thebibliography}
