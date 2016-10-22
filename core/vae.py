@@ -92,7 +92,7 @@ class Variational_Autoencoder():
                                                         self.batch_eps: batch_eps})
                     duration = time.time() - start_time
 
-                    #assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
+                    assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
                     avg_loss_value += loss_value / self.n_samples * self.batch_size
 

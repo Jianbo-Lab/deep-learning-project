@@ -22,7 +22,7 @@ def run_experiment(learning_rate, filter_dim, hidden_dim,num_epochs = 5):
     model = Variational_Autoencoder(sess,build_encoder, build_decoder, \
         checkpoint_name, batch_size = 100,z_dim = 20,
         img_dim = 784,dataset = 'mnist',
-        learning_rate = 0.005, num_epochs = num_epochs,
+        learning_rate = learning_rate, num_epochs = num_epochs,
         checkpoint_dir = './')
 
     model.train()

@@ -1,2 +1,2 @@
-model_checkpoint_path: "cvae_label_checkpoint"
-all_model_checkpoint_paths: "cvae_label_checkpoint"
+model_checkpoint_path: "cvae_label_restricted_checkpoint"
+all_model_checkpoint_paths: "cvae_label_restricted_checkpoint"
