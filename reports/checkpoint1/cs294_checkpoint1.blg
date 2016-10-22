@@ -3,46 +3,44 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: cs294_checkpoint1.aux
 The style file: plain.bst
 Database file #1: cs294_bib.bib
-Warning--empty year in liwicki2005iam
-You've used 8 entries,
+You've used 4 entries,
             2118 wiz_defined-function locations,
-            539 strings with 5415 characters,
-and the built_in function-call counts, 2698 in all, are:
-= -- 260
-> -- 153
-< -- 2
-+ -- 62
-- -- 52
-* -- 171
-:= -- 465
-add.period$ -- 25
-call.type$ -- 8
-change.case$ -- 50
+            519 strings with 4644 characters,
+and the built_in function-call counts, 1103 in all, are:
+= -- 100
+> -- 71
+< -- 0
++ -- 28
+- -- 24
+* -- 69
+:= -- 214
+add.period$ -- 12
+call.type$ -- 4
+change.case$ -- 24
 chr.to.int$ -- 0
-cite$ -- 9
-duplicate$ -- 104
-empty$ -- 182
-format.name$ -- 52
-if$ -- 556
+cite$ -- 4
+duplicate$ -- 40
+empty$ -- 69
+format.name$ -- 24
+if$ -- 212
 int.to.chr$ -- 0
-int.to.str$ -- 8
-missing$ -- 7
-newline$ -- 43
-num.names$ -- 16
-pop$ -- 53
+int.to.str$ -- 4
+missing$ -- 4
+newline$ -- 23
+num.names$ -- 8
+pop$ -- 22
 preamble$ -- 1
-purify$ -- 42
+purify$ -- 20
 quote$ -- 0
-skip$ -- 83
+skip$ -- 30
 stack$ -- 0
-substring$ -- 114
-swap$ -- 29
-text.length$ -- 2
+substring$ -- 20
+swap$ -- 4
+text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 32
-warning$ -- 1
-while$ -- 22
-width$ -- 9
-write$ -- 85
-(There was 1 warning)
+type$ -- 16
+warning$ -- 0
+while$ -- 8
+width$ -- 5
+write$ -- 43
