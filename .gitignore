@@ -3,3 +3,11 @@
 *.ipynb_checkpoints
 *.meta
 *MNIST
+*.aux
+*.dep
+*.fdb_latexmk
+*.log
+*.out
+*.synctex.gz
+*.log
+*.fls

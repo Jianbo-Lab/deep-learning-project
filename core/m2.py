@@ -9,20 +9,25 @@ import os
 class SSL_M2():
     def __init__(self, sess, build_encoder1, build_encoder2, build_decoder, dataset_l, dataset_u,
         checkpoint_name = 'SSL_M2_checkpoint',
-        batch_size = 100, z_dim = 20, x_dim = 784, y_dim = 10, alpha = 5500,
+        batch_size = 100, z_dim = 20, x_dim = 784, y_dim = 10, alpha = 5500.,
         learning_rate = 0.001, num_epochs = 5,load = False,load_file = None,
         checkpoint_dir = '../notebook/checkpoints/'):
         """
         Inputs:
         sess: TensorFlow session.
-        build_encoder: A function that lays down the computational
-        graph for the encoder.
+        build_encoder1, build_encoder2: A function that lays down the computational
+        graph for the encoder. build_encoder1 only takes x,
+        while build_encoder2 will take y and the output of build_encoder1
         build_decoder: A function that lays down the computational
         graph for the decoder.
+        dataset_l: labeled dataset
+        dataset_u: unlabeled dataset
         checkpoint_name: The name of the checkpoint file to be saved.
         batch_size: The number of samples in each batch.
         z_dim: the dimension of z.
         x_dim: the dimension of an image.
+        y_dim: number of labels
+        alpha: tuning parameter (see paper)
         (Currently, we only consider 28*28 = 784.)
         dataset: The filename of the dataset.
         (Currently we only consider mnist.)
@@ -42,7 +47,6 @@ class SSL_M2():
         self.y_dim = y_dim
         self.batch_size = batch_size
         self.learning_rate = learning_rate
-        #self.dataset = dataset
         self.num_epochs = num_epochs
         self.load = load
         self.load_file = load_file
@@ -68,24 +72,22 @@ class SSL_M2():
     def train(self):
         """ Train VAE for a number of steps."""
         global_step = tf.Variable(0, trainable = False)
+
         # Compute the objective function.
-
-        #print "before vae_l"
         loss_l = self.build_vae_l()
-        #print "before vae_u"
         loss_u = self.build_vae_u()
-        #print "finished building"
 
-        # Build a graph that trains the model with one batch of examples
-        # and updates the model parameters.
+        # Get optimizers
         optimum_l = tf.train.AdamOptimizer(self.learning_rate).minimize(loss_l, global_step=global_step)
         optimum_u = tf.train.AdamOptimizer(self.learning_rate).minimize(loss_u, global_step=global_step)
 
 
 
-        # Build an initialization operation to run.
+        # Initialize
         init = tf.initialize_all_variables()
         self.sess.run(init)
+
+
         if self.load:
             self.saver = tf.train.Saver()
             self.saver.restore(self.sess, self.load_file)
@@ -96,8 +98,9 @@ class SSL_M2():
             for epoch in xrange(self.num_epochs):
                 avg_loss_value = 0.
 
+                # Process labeled batch
                 for b in xrange(num_batches_l):
-                    # Get images from the mnist dataset.
+                    # Get images and labels
                     batch_x_l, batch_y_l = self.input_l()
 
                     # Sample a batch of eps from standard normal distribution.
@@ -116,7 +119,7 @@ class SSL_M2():
                     avg_loss_value += loss_value / self.n_samples_l * self.batch_size
 
                 for b in xrange(num_batches_u):
-                    # Get images from the mnist dataset.
+                    # Get unlabeled images
                     batch_x_u = self.input_u()
 
                     # Sample a batch of eps from standard normal distribution.
@@ -124,7 +127,9 @@ class SSL_M2():
 
                     # Run a step of adam optimization and loss computation.
                     start_time = time.time()
+                    # sample label y from the distribution q(y|x)
                     y_u = self.sess.run(self.encoder_y_prob_u, feed_dict = {self.x_u: batch_x_u})
+                    # then input image and sampled label
                     _, loss_value = self.sess.run([optimum_u,loss_u],
                                             feed_dict = {self.x_u: batch_x_u,
                                                         self.y_u: y_u,
@@ -135,8 +140,6 @@ class SSL_M2():
 
                     avg_loss_value += loss_value / self.n_samples_u * self.batch_size
 
-                # Later we'll add summary and log files to record training procedures.
-                # For now, we will satisfy with naive printing.
                 print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
             self.save(epoch)
 
@@ -145,9 +148,10 @@ class SSL_M2():
         #self.saver.save(self.sess, os.path.join(self.checkpoint_dir, self.checkpoint_name), global_step = epoch)
         self.saver.save(self.sess, os.path.join(self.checkpoint_dir, self.checkpoint_name))
 
+
     def input_l(self):
         """
-        This function reads in one batch of data.
+        This function reads in one batch of labeled data
         """
         x_l, y_l = self.dataset_l.next_batch(self.batch_size)
         return x_l, y_l
@@ -158,7 +162,7 @@ class SSL_M2():
             #return batch_images, batch_labels
     def input_u(self):
         """
-        This function reads in one batch of data.
+        This function reads in one batch of unlabeled data.
         """
 
         x_u, _ = self.dataset_u.next_batch(self.batch_size)
@@ -172,20 +176,24 @@ class SSL_M2():
     def build_vae_l(self):
         #print "building vae l"
         """
-        This function builds up VAE from encoder and decoder function
+        This function builds up the VAE for labeled data from encoder and decoder function
         in the global environment.
         """
-        # Add a placeholder for one batch of images
+        # Add a placeholder for one batch of images and labels
         self.x_l = tf.placeholder(tf.float32,[self.batch_size, self.x_dim], name = 'x_l')
         self.y_l = tf.placeholder(tf.float32,[self.batch_size, self.y_dim], name = 'y_l')
 
         # Create a placeholder for eps.
         self.batch_eps_l = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps_l')
+
+
         # Construct the mean and the variance of q(z|x).
         self.encoder_log_sigma_sq_l, self.encoder_y_prob_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim)
         self.encoder_mu_l = self.build_encoder2(h1_l, self.y_l, self.z_dim)
+
         # Compute z from eps and z_mean, z_sigma2.
         self.batch_z_l = tf.add(self.encoder_mu_l, tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma_sq_l)), self.batch_eps_l))
+
         # Construct the mean of the Bernoulli distribution p(x|z).
         self.decoder_mean_l = self.build_decoder(self.batch_z_l, self.y_l, self.x_dim)
 
@@ -198,15 +206,10 @@ class SSL_M2():
                                            - tf.square(self.encoder_mu_l)
                                            - tf.exp(self.encoder_log_sigma_sq_l), 1)
 
+        # - log p(y)
         label_loss = -self.batch_size * np.log(1e-10 + 1./self.y_dim)
 
-        #print "1"
-        #print self.encoder_y_prob_l.get_shape()
-        #print "2"
-        #print self.y_l.get_shape()
-        #print "3"
-        #print tf.log(tf.reduce_sum((self.encoder_y_prob_l * self.y_l),1)).get_shape()
-
+        # classification loss, weighted by alpha
         classification_loss = - self.alpha * tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_l * self.y_l, 1))
 
         # Add up to the cost.
@@ -217,7 +220,7 @@ class SSL_M2():
     def build_vae_u(self):
         #print "building vae_u"
         """
-        This function builds up VAE from encoder and decoder function
+        This function builds up VAE for unlabeled data from encoder and decoder function
         in the global environment.
         """
         # Add a placeholder for one batch of images
@@ -229,8 +232,10 @@ class SSL_M2():
         # Construct the mean and the variance of q(z|x).
         self.encoder_log_sigma_sq_u, self.encoder_y_prob_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True)
         self.encoder_mu_u = self.build_encoder2(h1_u, self.y_u, self.z_dim, reuse=True)
+
         # Compute z from eps and z_mean, z_sigma2.
         self.batch_z_u = tf.add(self.encoder_mu_u, tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma_sq_u)), self.batch_eps_u))
+
         # Construct the mean of the Bernoulli distribution p(x|z).
         self.decoder_mean_u = self.build_decoder(self.batch_z_u, self.y_u, self.x_dim, reuse=True)
         # Compute the loss from decoder (empirically).
@@ -243,8 +248,10 @@ class SSL_M2():
                                            - tf.square(self.encoder_mu_u)
                                            - tf.exp(self.encoder_log_sigma_sq_u), 1)
 
+        # - log p(y)
         label_loss = -self.batch_size * np.log(1e-10 + 1./self.y_dim)
 
+        # extra entropy term H(q(y|x)) in loss for unlabeled data
         classification_loss = tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_u * self.y_u, 1))
 
         # Add up to the cost.

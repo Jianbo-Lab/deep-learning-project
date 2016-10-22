@@ -8,16 +8,17 @@ class Encoder1:
 
     def __call__(self, x, z_dim, y_dim, reuse=None):
         """
-        The probabilistic encoder which computes the mean and the log
-        of variance of z drawn from the Gaussian distribution q(z|images).
+        The probabilistic encoder which computes the log
+        of variance of z drawn from the Gaussian distribution q(z|images)
+        as well as the categorical distribution q(y|x).
 
         Inputs:
         images: A batch of images.
         z_dim: The dimension of hidden variable z.
+        y_dim: Number of labels
 
         Outputs:
-        A batch of means and log of the variances of z, each corresponding
-        to a single image in images.
+        log variance, categorical distribution, last layer activations
 
         """
 
@@ -41,16 +42,15 @@ class Encoder2:
 
     def __call__(self, h1, y, z_dim, reuse=None):
         """
-        The probabilistic encoder which computes the mean and the log
-        of variance of z drawn from the Gaussian distribution q(z|images).
+        The probabilistic encoder which computes the mean of z
+        drawn from the Gaussian distribution q(z|images).
 
         Inputs:
-        images: A batch of images.
-        z_dim: The dimension of hidden variable z.
+        h1: output of previous encoder
+        z_dim: latent dimension
 
         Outputs:
-        A batch of means and log of the variances of z, each corresponding
-        to a single image in images.
+        A batch of means of z
 
         """
 
@@ -70,10 +70,11 @@ class Decoder:
 
         Inputs:
         z: A batch of hidden variables.
+        y: labels
         img_dim: The dimension of one input image.
 
         Outputs:
-        x_mean: A batch of the means of p(x|z), each corresponding to a single z.
+        x_mean: A batch of the means of p(x|y,z)
         """
 
         h0 = tf.nn.softplus(linear(tf.concat(1, (z, y)), self.hidden_dim, scope = 'de_fc0', reuse=reuse))
