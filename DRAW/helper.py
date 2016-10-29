@@ -11,6 +11,7 @@ def linear(x, output_dim):
 
 
 def filterbank(gx, gy, sigma2, delta, N, A = 28, B = 28, eps = 1e-8):
+    # Compute Fx, Fy
     grid_i = tf.reshape(tf.cast(tf.range(N), tf.float32), [1, -1])
     mu_x = gx + (grid_i - N / 2 - 0.5) * delta # eq 19
     mu_y = gy + (grid_i - N / 2 - 0.5) * delta # eq 20
@@ -29,6 +30,7 @@ def filterbank(gx, gy, sigma2, delta, N, A = 28, B = 28, eps = 1e-8):
 
 
 def attn_window(scope, h_dec, N,  A, B, reuse, eps):
+    # Compute Fx, Fy and gamma
     with tf.variable_scope(scope,reuse = reuse):
         params=linear(h_dec, 5)
         gx_,gy_,log_sigma2,log_delta,log_gamma = tf.split(1,5,params)
@@ -45,6 +47,7 @@ def read_no_attn(x,x_hat,h_dec_prev, A, B, read_n, DO_SHARE, eps):
     return tf.concat(1,[x,x_hat])
 
 def read_attn(x,x_hat,h_dec_prev, A, B, read_n, DO_SHARE, eps):
+    # Compute x, x_hat
     Fx,Fy,gamma=attn_window("read", h_dec_prev, read_n, A, B, DO_SHARE, eps)
 
     def filter_img(img,Fx, Fy,gamma,N):

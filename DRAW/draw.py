@@ -99,7 +99,9 @@ class DRAW():
 	    if i % self.print_itrs  == 0:
 		print("iter=%d : Lx: %f Lz: %f" % (i, self.Lxs[i], self.Lzs[i]))
 
+
         self.saver = tf.train.Saver()
+        self.saver.save(sess,'draw.ckpt')
 
 
 
@@ -112,13 +114,13 @@ class DRAW():
         canvases = np.array(canvases) # T x batch x img_size
         return canvases
 
-    # def generate(self):
+    def generate(self):
 
-    #     sampled_z = np.random.randn(self.T, self.batch_size, self.z_size)
-    #     feed_dict = {self.sapled_z: sampled_z}
-    #     canvases = self.sess.run(self.cs, feed_dict)
-    #     canvases = np.array(canvases) # T x batch x img_size
-    #     return canvases
+        sampled_z = np.random.randn(self.batch_size, self.z_size)
+        feed_dict = {self.z: sampled_z}
+        canvases = self.sess.run(self.cs, feed_dict)
+        canvases = np.array(canvases) # T x batch x img_size
+        return canvases
 
 
 
@@ -130,6 +132,7 @@ class DRAW():
         write = write_attn if self.read_attn else write_no_attn
       
         self.x = tf.placeholder(tf.float32,shape=(self.batch_size, self.img_size)) # input (batch_size * img_size)
+
 
         # Initialize variables
         self.cs = [0] * self.T # sequence of canvases
@@ -151,6 +154,7 @@ class DRAW():
             h_enc, enc_state = self.build_encoder(enc_state, tf.concat(1,[r, h_dec_prev]), reuse = self.DO_SHARE)
             self.z, mus[t], logsigmas[t], sigmas[t]= sampleQ(h_enc, self.DO_SHARE, \
                                                              self.batch_size, self.z_size)
+            # print self.z
 
             h_dec, dec_state = self.build_decoder(dec_state, self.z,  reuse = self.DO_SHARE)
   

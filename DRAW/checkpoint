@@ -1,2 +1,2 @@
-model_checkpoint_path: "vae_checkpoint-9"
-all_model_checkpoint_paths: "vae_checkpoint-9"
+model_checkpoint_path: "draw.ckpt"
+all_model_checkpoint_paths: "draw.ckpt"
