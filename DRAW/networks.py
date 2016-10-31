@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from ops import *
+# from ops import *
 
 class Encoder:
     def __init__(self, enc_size = 256):
