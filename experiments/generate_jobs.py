@@ -39,7 +39,8 @@ def generate_all_jobs(model):
  
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('model',type = str)    
+    parser.add_argument('model',type = str) 
+    args = parser.parse_args()   
     generate_all_jobs(args.model) 
 
 if __name__ == "__main__":
