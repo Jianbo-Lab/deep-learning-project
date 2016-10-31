@@ -252,7 +252,7 @@ class SSL_M2():
         label_loss = -self.batch_size * np.log(1e-10 + 1./self.y_dim)
 
         # extra entropy term H(q(y|x)) in loss for unlabeled data
-        classification_loss = tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_u * self.y_u, 1))
+        classification_loss = - tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_u * self.y_u, 1))
 
         # Add up to the cost.
         self.cost_u = tf.reduce_mean(encoder_loss + decoder_loss + label_loss + classification_loss)
