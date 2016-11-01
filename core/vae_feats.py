@@ -1,9 +1,10 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
-import time
-import ossupp
-from supplementary.invfeats import *
+import time 
+import sys
+sys.path.append('supplementary/')
+from invfeats import *
  
 
 class Variational_Autoencoder():
