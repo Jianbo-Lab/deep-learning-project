@@ -63,6 +63,7 @@ class Variational_Autoencoder():
 
             self.pretrained_model = PretrainedCNN(h5_file='../networks/cs294_129/datasets/pretrained_model.h5')
 
+
         if load:
             self.train()
 
