@@ -149,7 +149,7 @@ class Variational_Autoencoder():
 
         return self.cost
 
-    def generate(self,num = 10,load = False,filename = None):
+    def generate(self,num = 10,load = False,filename = None,chengidea = False,cheng_perturb= 1e-7):
         """
         This function generates images from VAE.
         Input:
@@ -160,9 +160,14 @@ class Variational_Autoencoder():
         # be generated smaller than the batch size for convenience.
         assert num <= self.batch_size, \
         "We require the number of images to be generated smaller than the batch size."
-
-        # Sample z from standard normals.
-        sampled_z = np.random.randn(self.batch_size,self.z_dim)
+        if chengidea:
+            # Sample small perturbations.
+            sampled_z = np.random.randn(self.batch_size,self.z_dim) * cheng_perturb
+            # Sample one random vector and add to small perturbations.
+            sampled_z += np.random.randn(self.z_dim)   
+        else:    
+            # Sample z from standard normals.
+            sampled_z = np.random.randn(self.batch_size,self.z_dim)
         
         return self.sess.run(self.decoder_mean,\
                       feed_dict = {self.batch_z:sampled_z}) 
