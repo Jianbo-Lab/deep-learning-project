@@ -11,7 +11,7 @@ class SSL_M2():
         checkpoint_name = 'SSL_M2_checkpoint',
         batch_size = 100, z_dim = 20, x_dim = 784, y_dim = 10, alpha = 5500.,
         learning_rate = 0.001, num_epochs = 5,load = False,load_file = None,
-        checkpoint_dir = '../notebook/checkpoints/'):
+        checkpoint_dir = '../notebook/checkpoints/',summaries_dir = 'm2_logs/'):
         """
         Inputs:
         sess: TensorFlow session.
@@ -52,6 +52,7 @@ class SSL_M2():
         self.load_file = load_file
         self.checkpoint_dir = checkpoint_dir
         self.alpha = alpha
+        self.summaries_dir = summaries_dir
         # if dataset == 'mnist':
         #     # Load MNIST data in a format suited for tensorflow.
         #     self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
@@ -76,13 +77,26 @@ class SSL_M2():
         # Compute the objective function.
         loss_l = self.build_vae_l()
         loss_u = self.build_vae_u()
+        summary_l = tf.scalar_summary('loss for labeled data', loss_l)
+        summary_u = tf.scalar_summary('loss for unlabeled data', loss_u)
 
+        merged = tf.merge_all_summaries()
+        summary_writer = tf.train.SummaryWriter(self.summaries_dir,self.sess.graph)
         # Get optimizers
         optimum_l = tf.train.AdamOptimizer(self.learning_rate).minimize(loss_l, global_step=global_step)
         optimum_u = tf.train.AdamOptimizer(self.learning_rate).minimize(loss_u, global_step=global_step)
 
+        # Lay down the graph for computing accuracy.
 
+        self.y_ = tf.placeholder(tf.float32,[self.batch_size, self.y_dim], name = 'y_')
 
+        with tf.name_scope('accuracy'):
+            with tf.name_scope('correct_prediction'):
+                correct_prediction = tf.equal(tf.argmax(self.encoder_y_prob_l, 1), tf.argmax(self.y_, 1))
+            with tf.name_scope('accuracy'):
+                accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+            summary_acc = tf.scalar_summary('training accuracy', accuracy)
+        
         # Initialize
         init = tf.initialize_all_variables()
         self.sess.run(init)
@@ -118,6 +132,22 @@ class SSL_M2():
 
                     avg_loss_value += loss_value / self.n_samples_l * self.batch_size
 
+                    if b % 10 == 0:
+                        # Add training loss_l to summary_writer.
+                        summary = self.sess.run(summary_l, feed_dict = {self.x_l: batch_x_l,
+                                                            self.y_l: batch_y_l,
+                                                            self.batch_eps_l: batch_eps_l}) 
+
+                        summary_writer.add_summary(summary, b + epoch * num_batches_l)
+
+                    # Add training accuracy to summary_writer.
+                    if b % 10 == 0:
+                        summary = self.sess.run(summary_acc,feed_dict = {self.x_l: batch_x_l,
+                            self.y_: batch_y_l})
+
+                        summary_writer.add_summary(summary, b + epoch * num_batches_l)
+ 
+
                 for b in xrange(num_batches_u):
                     # Get unlabeled images
                     batch_x_u = self.input_u()
@@ -140,7 +170,18 @@ class SSL_M2():
 
                     avg_loss_value += loss_value / self.n_samples_u * self.batch_size
 
+                    if b % 10 == 0:
+                        # Add training loss_l to summary_writer.
+                        summary = self.sess.run(summary_u, feed_dict = {self.x_u: batch_x_u,
+                                                        self.y_u: y_u,
+                                                        self.batch_eps_u: batch_eps_u}) 
+
+                        summary_writer.add_summary(summary, b + epoch * num_batches_u)
+
+                     
                 print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
+
+            summary_writer.close()
             self.save(epoch)
 
     def save(self,epoch):
