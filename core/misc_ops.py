@@ -1,5 +1,6 @@
 
 import numpy as np
+from PIL import Image
 
 def get_image_subset(x, idx, sample=True):
     """
@@ -48,3 +49,24 @@ def get_left_half(x, sample=True):
         return(subset)
     out = np.random.binomial(1, subset)
     return(out)
+
+def gray_to_rgb(img):
+    """
+    Converts 28 x 28 array to 3 x 64 x 64 RGB
+    """
+    img = img.reshape(28,28)
+    img = np.stack((img,img,img), axis=-1) # convert to RGB
+    img = Image.fromarray(np.uint8(img*255))
+    img = img.resize((64,64), Image.ANTIALIAS)
+    img = np.asarray(img)
+    img = np.rollaxis(img,2,0)
+    return(img)
+
+def get_feats(x, mean_img, model, layer):
+    N = x.shape[0]
+    x_rgb = np.zeros((N, 3, 64, 64))
+    for i in xrange(N):
+        x_rgb[i,] = gray_to_rgb(x[i,] - mean_img)
+    feats, _ = model.forward(x_rgb, end=layer)
+    feats = feats.reshape((N, -1))
+    return(feats)

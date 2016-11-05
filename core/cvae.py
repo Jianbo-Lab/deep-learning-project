@@ -12,7 +12,8 @@ class Conditional_Variational_Autoencoder():
         batch_size = 100, z_dim = 20, img_dim = 784, #dataset = 'mnist',
         learning_rate = 0.001, num_epochs = 5,
         condition_on_label = False, get_cond_info = None, cond_info_dim = 784,
-        load=False, load_file = None, checkpoint_dir = './checkpoints/'):
+        load=False, load_file = None, checkpoint_dir = './checkpoints/',
+        model = None, layer = 3):
         """
         Inputs:
         sess: TensorFlow session.
@@ -48,6 +49,8 @@ class Conditional_Variational_Autoencoder():
         self.load = load
         self.load_file = load_file
         self.checkpoint_dir = checkpoint_dir
+        self.model = model
+        self.layer = layer
 
 
         assert (not (get_cond_info is None)) or condition_on_label, \
@@ -63,31 +66,38 @@ class Conditional_Variational_Autoencoder():
             #self.n_samples = self.mnist.train.num_examples
         self.n_samples = dataset.num_examples
 
-        if load:
-            self.train()
 
-    def train(self):
-        """ Train VAE for a number of steps."""
+        if (not model is None):
+            allimg, _ = dataset.next_batch(self.n_samples)
+            self.mean_img = np.mean(allimg, axis=0)
+            x, _ = dataset.next_batch(2)
+            self.mean_img = np.mean(x, axis=0)
+            feats = get_feats(x, self.mean_img, self.model, self.layer)
+            self.img_dim = 28*28 + feats.shape[1]
+
+
+        """ Build vae """
         global_step = tf.Variable(0, trainable = False)
 
 
         # Compute the objective function.
-        loss = self.build_vae()
+        self.loss = self.build_vae()
 
 
         # Build a graph that trains the model with one batch of examples
         # and updates the model parameters.
-        optimum = tf.train.AdamOptimizer(self.learning_rate).minimize(loss, global_step=global_step)
+        self.optimum = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=global_step)
 
         # Build an initialization operation to run.
         init = tf.initialize_all_variables()
         self.sess.run(init)
 
-        if self.load:
+        if load:
             self.saver = tf.train.Saver()
             self.saver.restore(self.sess, self.load_file)
 
-        else:
+    def train(self):
+
 
             num_batches = int(self.n_samples / self.batch_size)
 
@@ -105,13 +115,13 @@ class Conditional_Variational_Autoencoder():
                     # Run a step of adam optimization and loss computation.
                     start_time = time.time()
 
-                    _, loss_value = self.sess.run([optimum,loss],
+                    _, loss_value = self.sess.run([self.optimum, self.loss],
                                         feed_dict = {self.images: batch_images,
                                                     self.batch_info: batch_info,
                                                     self.batch_eps: batch_eps})
                     duration = time.time() - start_time
 
-                    #assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
+                    assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
                     avg_loss_value += loss_value / self.n_samples * self.batch_size
 
@@ -137,6 +147,11 @@ class Conditional_Variational_Autoencoder():
             batch_info = batch_labels
         else:
             batch_info = self.get_cond_info(batch_images)
+
+        if not (self.model is None):
+            feats = get_feats(batch_images, self.mean_img, self.model, self.layer)
+            batch_images = np.concatenate((batch_images, feats), axis=1)
+
         return batch_images, batch_info
 
         #if self.dataset == 'mnist':
