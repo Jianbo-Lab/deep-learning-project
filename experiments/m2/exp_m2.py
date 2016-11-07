@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../../core/')
 sys.path.append('../../networks/')
-from ssl_fc import Encoder1, Encoder2, Decoder
+from ssl_fc import SSL_Encoder1, SSL_Encoder2, SSL_Decoder
 from m2 import SSL_M2
 from misc_ops import *
 
@@ -32,10 +32,10 @@ _, y = labeled.next_batch(num_labeled)
 # Test for adding summary.
 # Train
 sess = tf.InteractiveSession()
-build_encoder1 = Encoder1(500)
-build_encoder2 = Encoder2(500)
-build_decoder = Decoder(500)
- 
+build_encoder1 = SSL_Encoder1(500)
+build_encoder2 = SSL_Encoder2(500)
+build_decoder = SSL_Decoder(500)
+
 model = SSL_M2(sess, build_encoder1, build_encoder2, build_decoder, labeled, unlabeled,
            batch_size = 100, z_dim = 50, x_dim = 784, y_dim=10, alpha=55000./10,
           learning_rate = 1e-3, num_epochs = 1, load=False,

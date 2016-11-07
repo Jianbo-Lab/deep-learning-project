@@ -11,7 +11,7 @@ class SSL_M2():
         checkpoint_name = 'SSL_M2_checkpoint',
         batch_size = 100, z_dim = 20, x_dim = 784, y_dim = 10, alpha = 5500.,
         learning_rate = 0.001, num_epochs = 5,load = False,load_file = None,
-        checkpoint_dir = '../notebook/checkpoints/',summaries_dir = 'm2_logs/'):
+        checkpoint_dir = '../notebook/checkpoints/', summaries_dir = 'm2_logs/'):
         """
         Inputs:
         sess: TensorFlow session.
@@ -67,24 +67,19 @@ class SSL_M2():
         self.n_samples_l = dataset_l.num_examples
         self.n_samples_u = dataset_u.num_examples
 
-        if load:
-            self.train()
-
-    def train(self):
-        """ Train VAE for a number of steps."""
         global_step = tf.Variable(0, trainable = False)
 
         # Compute the objective function.
-        loss_l = self.build_vae_l()
-        loss_u = self.build_vae_u()
-        summary_l = tf.scalar_summary('loss for labeled data', loss_l)
-        summary_u = tf.scalar_summary('loss for unlabeled data', loss_u)
+        self.loss_l = self.build_vae_l()
+        self.loss_u = self.build_vae_u()
+        self.summary_l = tf.scalar_summary('loss for labeled data', self.loss_l)
+        self.summary_u = tf.scalar_summary('loss for unlabeled data', self.loss_u)
 
         merged = tf.merge_all_summaries()
-        summary_writer = tf.train.SummaryWriter(self.summaries_dir,self.sess.graph)
+        self.summary_writer = tf.train.SummaryWriter(self.summaries_dir,self.sess.graph)
         # Get optimizers
-        optimum_l = tf.train.AdamOptimizer(self.learning_rate).minimize(loss_l, global_step=global_step)
-        optimum_u = tf.train.AdamOptimizer(self.learning_rate).minimize(loss_u, global_step=global_step)
+        self.optimum_l = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss_l, global_step=global_step)
+        self.optimum_u = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss_u, global_step=global_step)
 
         # Lay down the graph for computing accuracy.
 
@@ -95,8 +90,8 @@ class SSL_M2():
                 correct_prediction = tf.equal(tf.argmax(self.encoder_y_prob_l, 1), tf.argmax(self.y_, 1))
             with tf.name_scope('accuracy'):
                 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            summary_acc = tf.scalar_summary('training accuracy', accuracy)
-        
+            self.summary_acc = tf.scalar_summary('training accuracy', accuracy)
+
         # Initialize
         init = tf.initialize_all_variables()
         self.sess.run(init)
@@ -105,84 +100,87 @@ class SSL_M2():
         if self.load:
             self.saver = tf.train.Saver()
             self.saver.restore(self.sess, self.load_file)
-        else:
-            num_batches_l = int(self.n_samples_l / self.batch_size)
-            num_batches_u = int(self.n_samples_u / self.batch_size)
 
-            for epoch in xrange(self.num_epochs):
-                avg_loss_value = 0.
+    def train(self):
+        """ Train VAE for a number of steps."""
 
-                # Process labeled batch
-                for b in xrange(num_batches_l):
-                    # Get images and labels
-                    batch_x_l, batch_y_l = self.input_l()
+        num_batches_l = int(self.n_samples_l / self.batch_size)
+        num_batches_u = int(self.n_samples_u / self.batch_size)
 
-                    # Sample a batch of eps from standard normal distribution.
-                    batch_eps_l = np.random.randn(self.batch_size, self.z_dim)
+        for epoch in xrange(self.num_epochs):
+            avg_loss_value = 0.
 
-                    # Run a step of adam optimization and loss computation.
-                    start_time = time.time()
-                    _, loss_value = self.sess.run([optimum_l,loss_l],
+            # Process labeled batch
+            for b in xrange(num_batches_l):
+                # Get images and labels
+                batch_x_l, batch_y_l = self.input_l()
+
+                # Sample a batch of eps from standard normal distribution.
+                batch_eps_l = np.random.randn(self.batch_size, self.z_dim)
+
+                # Run a step of adam optimization and loss computation.
+                start_time = time.time()
+                _, loss_value = self.sess.run([self.optimum_l,self.loss_l],
                                             feed_dict = {self.x_l: batch_x_l,
                                                         self.y_l: batch_y_l,
                                                         self.batch_eps_l: batch_eps_l})
-                    duration = time.time() - start_time
+                duration = time.time() - start_time
 
-                    assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
+                assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
-                    avg_loss_value += loss_value / self.n_samples_l * self.batch_size
+                avg_loss_value += loss_value / self.n_samples_l * self.batch_size
 
-                    if b % 10 == 0:
-                        # Add training loss_l to summary_writer.
-                        summary = self.sess.run(summary_l, feed_dict = {self.x_l: batch_x_l,
+                if b % 10 == 0:
+                    # Add training loss_l to self.summary_writer.
+                    summary = self.sess.run(self.summary_l, feed_dict = {self.x_l: batch_x_l,
                                                             self.y_l: batch_y_l,
-                                                            self.batch_eps_l: batch_eps_l}) 
+                                                            self.batch_eps_l: batch_eps_l})
 
-                        summary_writer.add_summary(summary, b + epoch * num_batches_l)
+                    self.summary_writer.add_summary(summary, b + epoch * num_batches_l)
 
-                    # Add training accuracy to summary_writer.
-                    if b % 10 == 0:
-                        summary = self.sess.run(summary_acc,feed_dict = {self.x_l: batch_x_l,
+                # Add training accuracy to self.summary_writer.
+                if b % 10 == 0:
+                    summary = self.sess.run(self.summary_acc,feed_dict = {self.x_l: batch_x_l,
                             self.y_: batch_y_l})
 
-                        summary_writer.add_summary(summary, b + epoch * num_batches_l)
- 
+                    self.summary_writer.add_summary(summary, b + epoch * num_batches_l)
 
-                for b in xrange(num_batches_u):
-                    # Get unlabeled images
-                    batch_x_u = self.input_u()
 
-                    # Sample a batch of eps from standard normal distribution.
-                    batch_eps_u = np.random.randn(self.batch_size, self.z_dim)
+            for b in xrange(num_batches_u):
+                # Get unlabeled images
+                batch_x_u = self.input_u()
 
-                    # Run a step of adam optimization and loss computation.
-                    start_time = time.time()
-                    # sample label y from the distribution q(y|x)
-                    y_u = self.sess.run(self.encoder_y_prob_u, feed_dict = {self.x_u: batch_x_u})
-                    # then input image and sampled label
-                    _, loss_value = self.sess.run([optimum_u,loss_u],
+                # Sample a batch of eps from standard normal distribution.
+                batch_eps_u = np.random.randn(self.batch_size, self.z_dim)
+
+                # Run a step of adam optimization and loss computation.
+                start_time = time.time()
+                # sample label y from the distribution q(y|x)
+                y_u = self.sess.run(self.encoder_y_prob_u, feed_dict = {self.x_u: batch_x_u})
+                # then input image and sampled label
+                _, loss_value = self.sess.run([self.optimum_u,self.loss_u],
                                             feed_dict = {self.x_u: batch_x_u,
                                                         self.y_u: y_u,
                                                         self.batch_eps_u: batch_eps_u})
-                    duration = time.time() - start_time
+                duration = time.time() - start_time
 
-                    assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
+                assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
-                    avg_loss_value += loss_value / self.n_samples_u * self.batch_size
+                avg_loss_value += loss_value / self.n_samples_u * self.batch_size
 
-                    if b % 10 == 0:
-                        # Add training loss_l to summary_writer.
-                        summary = self.sess.run(summary_u, feed_dict = {self.x_u: batch_x_u,
+                if b % 10 == 0:
+                    # Add training loss_l to self.summary_writer.
+                    summary = self.sess.run(self.summary_u, feed_dict = {self.x_u: batch_x_u,
                                                         self.y_u: y_u,
-                                                        self.batch_eps_u: batch_eps_u}) 
+                                                        self.batch_eps_u: batch_eps_u})
 
-                        summary_writer.add_summary(summary, b + epoch * num_batches_u)
+                    self.summary_writer.add_summary(summary, b + epoch * num_batches_u)
 
-                     
-                print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
 
-            summary_writer.close()
-            self.save(epoch)
+            print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
+
+        self.summary_writer.close()
+        self.save(epoch)
 
     def save(self,epoch):
         self.saver = tf.train.Saver()

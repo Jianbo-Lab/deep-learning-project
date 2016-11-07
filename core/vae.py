@@ -4,7 +4,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 import time
 import os
 
- 
+
 
 class Variational_Autoencoder():
     def __init__(self, sess, build_encoder, build_decoder, checkpoint_name = 'vae_checkpoint',
@@ -50,21 +50,20 @@ class Variational_Autoencoder():
             # Load MNIST data in a format suited for tensorflow.
             self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
             self.n_samples = self.mnist.train.num_examples
-        if load:
-            self.train()
+        else:
+            self.n_samples = dataset.num_examples
 
-    def train(self):
-        """ Train VAE for a number of steps."""
+
         global_step = tf.Variable(0, trainable = False)
 
 
         # Compute the objective function.
-        loss = self.build_vae()
+        self.loss = self.build_vae()
 
 
         # Build a graph that trains the model with one batch of examples
         # and updates the model parameters.
-        optimum = tf.train.AdamOptimizer(self.learning_rate).minimize(loss, global_step=global_step)
+        self.optimum = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=global_step)
 
         # Build an initialization operation to run.
         init = tf.initialize_all_variables()
@@ -72,39 +71,43 @@ class Variational_Autoencoder():
         if self.load:
             self.saver = tf.train.Saver()
             self.saver.restore(self.sess, self.load_file)
-        else:
-            num_batches = int(self.n_samples / self.batch_size)
 
-            for epoch in xrange(self.num_epochs): 
-                avg_loss_value = 0.
+    def train(self):
+        """ Train VAE for a number of steps."""
 
-                for b in xrange(num_batches):
-                    # Get images from the mnist dataset.
-                    batch_images = self.input()
 
-                    # Sample a batch of eps from standard normal distribution.
-                    batch_eps = np.random.randn(self.batch_size,self.z_dim)
+        num_batches = int(self.n_samples / self.batch_size)
 
-                    # Run a step of adam optimization and loss computation.
-                    start_time = time.time()
-                    _, loss_value = self.sess.run([optimum,loss],
+        for epoch in xrange(self.num_epochs):
+            avg_loss_value = 0.
+
+            for b in xrange(num_batches):
+                # Get images from the mnist dataset.
+                batch_images = self.input()
+
+                # Sample a batch of eps from standard normal distribution.
+                batch_eps = np.random.randn(self.batch_size,self.z_dim)
+
+                # Run a step of adam optimization and loss computation.
+                start_time = time.time()
+                _, loss_value = self.sess.run([self.optimum,self.loss],
                                             feed_dict = {self.images: batch_images,
                                                         self.batch_eps: batch_eps})
-                    duration = time.time() - start_time
+                duration = time.time() - start_time
 
-                    assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
+                assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
-                    avg_loss_value += loss_value / self.n_samples * self.batch_size
+                avg_loss_value += loss_value / self.n_samples * self.batch_size
 
-                # Later we'll add summary and log files to record training procedures.
-                # For now, we will satisfy with naive printing.
-                print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value) 
-            self.save(epoch)
+            # Later we'll add summary and log files to record training procedures.
+            # For now, we will satisfy with naive printing.
+            print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
+        self.save(epoch)
 
     def save(self,epoch):
         self.saver = tf.train.Saver()
-        self.saver.save(self.sess, os.path.join(self.checkpoint_dir, 
-            self.checkpoint_name), global_step = epoch)
+        self.saver.save(self.sess, os.path.join(self.checkpoint_dir,
+            self.checkpoint_name))#, global_step = epoch)
 
     def input(self):
         """
@@ -115,6 +118,9 @@ class Variational_Autoencoder():
             batch_images, _ = self.mnist.train.next_batch(self.batch_size)
 
             return batch_images
+
+        batch_images, _ = self.dataset.next_batch(self.batch_size)
+        return(batch_images)
 
     def build_vae(self):
         """
@@ -164,11 +170,14 @@ class Variational_Autoencoder():
             # Sample small perturbations.
             sampled_z = np.random.randn(self.batch_size,self.z_dim) * cheng_perturb
             # Sample one random vector and add to small perturbations.
-            sampled_z += np.random.randn(self.z_dim)   
-        else:    
+            sampled_z += np.random.randn(self.z_dim)
+        else:
             # Sample z from standard normals.
             sampled_z = np.random.randn(self.batch_size,self.z_dim)
-        
+
         return self.sess.run(self.decoder_mean,\
-                      feed_dict = {self.batch_z:sampled_z}) 
+                      feed_dict = {self.batch_z:sampled_z})
+
+    def get_code(self, img):
+        return self.sess.run(self.encoder_mean, feed_dict={self.images:img})
 

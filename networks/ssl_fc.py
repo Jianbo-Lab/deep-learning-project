@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from ops import *
 
-class Encoder1:
+class SSL_Encoder1:
     def __init__(self, hidden_dim = 100):
         self.hidden_dim = hidden_dim
 
@@ -36,7 +36,7 @@ class Encoder1:
         #z_log_sigma_sq = linear(h2, z_dim, scope = 'z_log_sigma')
         return (z_log_sigma_sq, y_prob, h1)
 
-class Encoder2:
+class SSL_Encoder2:
     def __init__(self, hidden_dim = 100):
         self.hidden_dim = hidden_dim
 
@@ -59,7 +59,7 @@ class Encoder2:
         z_mu= linear(h2, z_dim, scope = 'z_mu', reuse=reuse)
         return z_mu
 
-class Decoder:
+class SSL_Decoder:
     def __init__(self, hidden_dim = 100):
         self.hidden_dim = hidden_dim
 
