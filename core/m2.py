@@ -120,13 +120,20 @@ class SSL_M2():
 
                 # Run a step of adam optimization and loss computation.
                 start_time = time.time()
-                _, loss_value = self.sess.run([self.optimum_l,self.loss_l],
+                _, loss_value, encoder_loss_l, decoder_loss_l, classification_loss_l, label_loss_l, encoder_log_sigma_sq_l = self.sess.run([self.optimum_l, self.loss_l, self.encoder_loss_l, self.decoder_loss_l, self.classification_loss_l, self.label_loss_l, self.encoder_log_sigma_sq_l],
                                             feed_dict = {self.x_l: batch_x_l,
                                                         self.y_l: batch_y_l,
                                                         self.batch_eps_l: batch_eps_l})
                 duration = time.time() - start_time
 
+                assert not np.isnan(encoder_log_sigma_sq_l).any(), 'Model diverged with loss = NaN'
+                assert not np.isnan(encoder_loss_l).any(), 'Model diverged with loss = NaN'
+                assert not np.isnan(decoder_loss_l).any(), 'Model diverged with loss = NaN'
+                assert not np.isnan(classification_loss_l).any(), 'Model diverged with loss = NaN'
+                assert not np.isnan(label_loss_l).any(), 'Model diverged with loss = NaN'
+
                 assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
+                assert not np.isnan(encoder_log_sigma_sq_l).any(), 'Model diverged with loss = NaN'
 
                 avg_loss_value += loss_value / self.n_samples_l * self.batch_size
 
@@ -158,11 +165,17 @@ class SSL_M2():
                 # sample label y from the distribution q(y|x)
                 y_u = self.sess.run(self.encoder_y_prob_u, feed_dict = {self.x_u: batch_x_u})
                 # then input image and sampled label
-                _, loss_value = self.sess.run([self.optimum_u,self.loss_u],
+                _, loss_value, encoder_loss_u, decoder_loss_u, classification_loss_u, label_loss_u, encoder_log_sigma_sq_u = self.sess.run([self.optimum_u,self.loss_u, self.encoder_loss_u, self.decoder_loss_u, self.classification_loss_u, self.label_loss_u, self.encoder_log_sigma_sq_u],
                                             feed_dict = {self.x_u: batch_x_u,
                                                         self.y_u: y_u,
                                                         self.batch_eps_u: batch_eps_u})
                 duration = time.time() - start_time
+
+                assert not np.isnan(encoder_log_sigma_sq_u).any(), 'Model diverged with loss = NaN'
+                assert not np.isnan(encoder_loss_u).any(), 'Model diverged with loss = NaN'
+                assert not np.isnan(decoder_loss_u).any(), 'Model diverged with loss = NaN'
+                assert not np.isnan(classification_loss_u).any(), 'Model diverged with loss = NaN'
+                assert not np.isnan(label_loss_u).any(), 'Model diverged with loss = NaN'
 
                 assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
@@ -237,22 +250,22 @@ class SSL_M2():
         self.decoder_mean_l = self.build_decoder(self.batch_z_l, self.y_l, self.x_dim)
 
         # Compute the loss from decoder (empirically).
-        decoder_loss = -tf.reduce_sum(self.x_l * tf.log(1e-10 + self.decoder_mean_l) \
+        self.decoder_loss_l = -tf.reduce_sum(self.x_l * tf.log(1e-10 + self.decoder_mean_l) \
                            + (1 - self.x_l) * tf.log(1e-10 + 1 - self.decoder_mean_l),
                            1)
         # Compute the loss from encoder (analytically).
-        encoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma_sq_l
+        self.encoder_loss_l = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma_sq_l
                                            - tf.square(self.encoder_mu_l)
                                            - tf.exp(self.encoder_log_sigma_sq_l), 1)
 
         # - log p(y)
-        label_loss = -self.batch_size * np.log(1e-10 + 1./self.y_dim)
+        self.label_loss_l = -self.batch_size * tf.log(1e-10 + 1./self.y_dim)
 
         # classification loss, weighted by alpha
-        classification_loss = - self.alpha * tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_l * self.y_l, 1))
+        self.classification_loss_l = - self.alpha * tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_l * self.y_l, 1))
 
         # Add up to the cost.
-        self.cost_l = tf.reduce_mean(encoder_loss + decoder_loss + label_loss + classification_loss)
+        self.cost_l = tf.reduce_mean(self.encoder_loss_l + self.decoder_loss_l + self.label_loss_l + self.classification_loss_l)
 
         return self.cost_l
 
@@ -279,22 +292,22 @@ class SSL_M2():
         self.decoder_mean_u = self.build_decoder(self.batch_z_u, self.y_u, self.x_dim, reuse=True)
         # Compute the loss from decoder (empirically).
 
-        decoder_loss = -tf.reduce_sum(self.x_u * tf.log(1e-10 + self.decoder_mean_u) \
+        self.decoder_loss_u = -tf.reduce_sum(self.x_u * tf.log(1e-10 + self.decoder_mean_u) \
                            + (1 - self.x_u) * tf.log(1e-10 + 1 - self.decoder_mean_u),
                            1)
         # Compute the loss from encoder (analytically).
-        encoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma_sq_u
+        self.encoder_loss_u = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma_sq_u
                                            - tf.square(self.encoder_mu_u)
                                            - tf.exp(self.encoder_log_sigma_sq_u), 1)
 
         # - log p(y)
-        label_loss = -self.batch_size * np.log(1e-10 + 1./self.y_dim)
+        self.label_loss_u = -self.batch_size * tf.log(1e-10 + 1./self.y_dim)
 
         # extra entropy term H(q(y|x)) in loss for unlabeled data
-        classification_loss = - tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_u * self.y_u, 1))
+        self.classification_loss_u = - tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_u * self.y_u, 1))
 
         # Add up to the cost.
-        self.cost_u = tf.reduce_mean(encoder_loss + decoder_loss + label_loss + classification_loss)
+        self.cost_u = tf.reduce_mean(self.encoder_loss_u + self.decoder_loss_u + self.label_loss_u + self.classification_loss_u)
 
         return self.cost_u
 
