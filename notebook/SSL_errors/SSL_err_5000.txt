@@ -1,2 +1,0 @@
-Validation error: 0.0358
-Test error: 0.0387

@@ -1,2 +1,2 @@
-model_checkpoint_path: "cvae_feats_checkpoint4"
-all_model_checkpoint_paths: "cvae_feats_checkpoint4"
+model_checkpoint_path: "SSL_M2_checkpoint_600"
+all_model_checkpoint_paths: "SSL_M2_checkpoint_600"
