@@ -120,20 +120,17 @@ class SSL_M2():
 
                 # Run a step of adam optimization and loss computation.
                 start_time = time.time()
-                _, loss_value, encoder_loss_l, decoder_loss_l, classification_loss_l, label_loss_l, encoder_log_sigma_sq_l = self.sess.run([self.optimum_l, self.loss_l, self.encoder_loss_l, self.decoder_loss_l, self.classification_loss_l, self.label_loss_l, self.encoder_log_sigma_sq_l],
+                _, loss_value = self.sess.run([self.optimum_l, self.loss_l],
                                             feed_dict = {self.x_l: batch_x_l,
                                                         self.y_l: batch_y_l,
-                                                        self.batch_eps_l: batch_eps_l})
+                                                        self.batch_eps_l: batch_eps_l,
+                                                        self.train_phase_l:True,
+                                                        self.train_phase_u:True})
                 duration = time.time() - start_time
 
-                assert not np.isnan(encoder_log_sigma_sq_l).any(), 'Model diverged with loss = NaN'
-                assert not np.isnan(encoder_loss_l).any(), 'Model diverged with loss = NaN'
-                assert not np.isnan(decoder_loss_l).any(), 'Model diverged with loss = NaN'
-                assert not np.isnan(classification_loss_l).any(), 'Model diverged with loss = NaN'
-                assert not np.isnan(label_loss_l).any(), 'Model diverged with loss = NaN'
+
 
                 assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
-                assert not np.isnan(encoder_log_sigma_sq_l).any(), 'Model diverged with loss = NaN'
 
                 avg_loss_value += loss_value / self.n_samples_l * self.batch_size
 
@@ -141,14 +138,16 @@ class SSL_M2():
                     # Add training loss_l to self.summary_writer.
                     summary = self.sess.run(self.summary_l, feed_dict = {self.x_l: batch_x_l,
                                                             self.y_l: batch_y_l,
-                                                            self.batch_eps_l: batch_eps_l})
+                                                            self.batch_eps_l: batch_eps_l,
+                                                            self.train_phase_l:True,
+                                                            self.train_phase_u:True})
 
                     self.summary_writer.add_summary(summary, b + epoch * num_batches_l)
 
                 # Add training accuracy to self.summary_writer.
                 if b % 10 == 0:
                     summary = self.sess.run(self.summary_acc,feed_dict = {self.x_l: batch_x_l,
-                            self.y_: batch_y_l})
+                            self.y_: batch_y_l, self.train_phase_l:False, self.train_phase_u:False})
 
                     self.summary_writer.add_summary(summary, b + epoch * num_batches_l)
 
@@ -163,19 +162,16 @@ class SSL_M2():
                 # Run a step of adam optimization and loss computation.
                 start_time = time.time()
                 # sample label y from the distribution q(y|x)
-                y_u = self.sess.run(self.encoder_y_prob_u, feed_dict = {self.x_u: batch_x_u})
+                y_u = self.sess.run(self.encoder_y_prob_u, feed_dict = {self.x_u: batch_x_u, self.train_phase_l:True, self.train_phase_u:True})
                 # then input image and sampled label
-                _, loss_value, encoder_loss_u, decoder_loss_u, classification_loss_u, label_loss_u, encoder_log_sigma_sq_u = self.sess.run([self.optimum_u,self.loss_u, self.encoder_loss_u, self.decoder_loss_u, self.classification_loss_u, self.label_loss_u, self.encoder_log_sigma_sq_u],
+                _, loss_value = self.sess.run([self.optimum_u, self.loss_u],
                                             feed_dict = {self.x_u: batch_x_u,
                                                         self.y_u: y_u,
-                                                        self.batch_eps_u: batch_eps_u})
+                                                        self.batch_eps_u: batch_eps_u,
+                                                        self.train_phase_l:True,
+                                                        self.train_phase_u:True})
                 duration = time.time() - start_time
 
-                assert not np.isnan(encoder_log_sigma_sq_u).any(), 'Model diverged with loss = NaN'
-                assert not np.isnan(encoder_loss_u).any(), 'Model diverged with loss = NaN'
-                assert not np.isnan(decoder_loss_u).any(), 'Model diverged with loss = NaN'
-                assert not np.isnan(classification_loss_u).any(), 'Model diverged with loss = NaN'
-                assert not np.isnan(label_loss_u).any(), 'Model diverged with loss = NaN'
 
                 assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
@@ -185,7 +181,9 @@ class SSL_M2():
                     # Add training loss_l to self.summary_writer.
                     summary = self.sess.run(self.summary_u, feed_dict = {self.x_u: batch_x_u,
                                                         self.y_u: y_u,
-                                                        self.batch_eps_u: batch_eps_u})
+                                                        self.batch_eps_u: batch_eps_u,
+                                                        self.train_phase_l:False,
+                                                        self.train_phase_u:False})
 
                     self.summary_writer.add_summary(summary, b + epoch * num_batches_u)
 
@@ -238,16 +236,19 @@ class SSL_M2():
         # Create a placeholder for eps.
         self.batch_eps_l = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps_l')
 
+        # boolean for training
+        self.train_phase_l = tf.placeholder(tf.bool, name='train_phase_l')
+
 
         # Construct the mean and the variance of q(z|x).
-        self.encoder_log_sigma_sq_l, self.encoder_y_prob_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim)
-        self.encoder_mu_l = self.build_encoder2(h1_l, self.y_l, self.z_dim)
+        self.encoder_log_sigma_sq_l, self.encoder_y_prob_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim, train_phase=self.train_phase_l)
+        self.encoder_mu_l = self.build_encoder2(h1_l, self.y_l, self.z_dim, train_phase=self.train_phase_l)
 
         # Compute z from eps and z_mean, z_sigma2.
         self.batch_z_l = tf.add(self.encoder_mu_l, tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma_sq_l)), self.batch_eps_l))
 
         # Construct the mean of the Bernoulli distribution p(x|z).
-        self.decoder_mean_l = self.build_decoder(self.batch_z_l, self.y_l, self.x_dim)
+        self.decoder_mean_l = self.build_decoder(self.batch_z_l, self.y_l, self.x_dim, train_phase=self.train_phase_l)
 
         # Compute the loss from decoder (empirically).
         self.decoder_loss_l = -tf.reduce_sum(self.x_l * tf.log(1e-10 + self.decoder_mean_l) \
@@ -281,15 +282,19 @@ class SSL_M2():
 
         # Create a placeholder for eps.
         self.batch_eps_u = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps_u')
+
+        # boolean for training flag in batch normalization
+        self.train_phase_u = tf.placeholder(tf.bool, name='train_phase_u')
+
         # Construct the mean and the variance of q(z|x).
-        self.encoder_log_sigma_sq_u, self.encoder_y_prob_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True)
-        self.encoder_mu_u = self.build_encoder2(h1_u, self.y_u, self.z_dim, reuse=True)
+        self.encoder_log_sigma_sq_u, self.encoder_y_prob_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True, train_phase=self.train_phase_u)
+        self.encoder_mu_u = self.build_encoder2(h1_u, self.y_u, self.z_dim, reuse=True, train_phase=self.train_phase_u)
 
         # Compute z from eps and z_mean, z_sigma2.
         self.batch_z_u = tf.add(self.encoder_mu_u, tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma_sq_u)), self.batch_eps_u))
 
         # Construct the mean of the Bernoulli distribution p(x|z).
-        self.decoder_mean_u = self.build_decoder(self.batch_z_u, self.y_u, self.x_dim, reuse=True)
+        self.decoder_mean_u = self.build_decoder(self.batch_z_u, self.y_u, self.x_dim, reuse=True, train_phase=self.train_phase_u)
         # Compute the loss from decoder (empirically).
 
         self.decoder_loss_u = -tf.reduce_sum(self.x_u * tf.log(1e-10 + self.decoder_mean_u) \
@@ -331,7 +336,7 @@ class SSL_M2():
         if labels is None:
             _, labels = self.input_l()
 
-        return self.sess.run(self.decoder_mean_l, feed_dict = {self.batch_z_l: sampled_z, self.y_l: labels})
+        return self.sess.run(self.decoder_mean_l, feed_dict = {self.batch_z_l: sampled_z, self.y_l: labels, self.train_phase_l:False, self.train_phase_u:False})
 
     def classify(self, x):
         """
@@ -340,5 +345,5 @@ class SSL_M2():
         n = x.shape[0]
         assert n <= self.batch_size, "Cannot classify more than batch size at one time."
 
-        return np.argmax(self.sess.run(self.encoder_y_prob_l, feed_dict = {self.x_l: x}), axis=1)
+        return np.argmax(self.sess.run(self.encoder_y_prob_l, feed_dict = {self.x_l: x, self.train_phase_l:False, self.train_phase_u:False}), axis=1)
 

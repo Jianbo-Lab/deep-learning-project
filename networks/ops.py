@@ -3,6 +3,8 @@
 # and other resources. (We need to add reference when publishing the codes.)
 import numpy as np
 import tensorflow as tf
+from tensorflow.contrib.layers.python.layers import batch_norm as tf_batch_norm
+
 
 def linear(input_, output_size, scope=None,
            bias_start=0.0, with_w=False, reuse=None):
@@ -91,3 +93,15 @@ class batch_norm(object):
                 x, mean, var, self.beta, self.gamma, self.epsilon, scale_after_normalization=True)
 
         return normed
+
+
+# based on http://stackoverflow.com/a/38320613/1922779
+def batch_norm_layer(x,train_phase,scope_bn, reuse=None):
+    bn_train = tf_batch_norm(x, decay=0.999, center=True, scale=True,
+        updates_collections=None, is_training=True, reuse=reuse,
+        trainable=True, scope=scope_bn)
+    bn_inference = tf_batch_norm(x, decay=0.999, center=True, scale=True,
+        updates_collections=None, is_training=False, reuse=True,
+        trainable=True, scope=scope_bn)
+    z = tf.cond(train_phase, lambda: bn_train, lambda: bn_inference)
+    return z
