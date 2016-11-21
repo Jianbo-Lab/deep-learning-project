@@ -86,6 +86,8 @@ class Variational_Autoencoder():
 
         self.num_iterations = 0
 
+        self.log = []
+
     def train(self):
         """ Train VAE for a number of steps."""
 
@@ -113,6 +115,9 @@ class Variational_Autoencoder():
                 avg_loss_value += loss_value / self.n_samples * self.batch_size
 
                 self.num_iterations += 1
+
+                if self.num_iterations % 100 == 1:
+                    self.log.append([self.num_iterations, self.np_temp, loss_value / self.n_samples * self.batch_size])
 
                 if self.num_iterations % 1000 == 1:
                     self.np_temp = np.maximum(self.tau0*np.exp(-self.anneal_rate*self.num_iterations), self.min_temp)
@@ -160,10 +165,10 @@ class Variational_Autoencoder():
         self.z = tf.reshape(gumbel_softmax(self.logits_z, self.tau, hard=False), [-1,self.N,self.K])
 
         self.logits_x = self.build_decoder(self.z, self.x_dim)
-
         p_x = Bernoulli(logits = self.logits_x)
-
-        self.p_x_prob = p_x.p
+        self.x_mean = p_x.p
+        # self.p_x_prob = tf.nn.sigmoid(self.logits_x)
+        # self.x_mean = self.build_decoder(self.z, self.x_dim)
 
         self.encoder_loss = tf.reduce_sum(tf.reshape(
             tf.exp(self.log_q_z) * (self.log_q_z - tf.log(1.0/self.K)),
@@ -171,6 +176,7 @@ class Variational_Autoencoder():
             ), [1,2])
 
         self.decoder_loss = -tf.reduce_sum(p_x.log_prob(self.x), 1)
+        # self.decoder_loss = -tf.reduce_sum(self.x * tf.log(self.x_mean + 1e-10) + (1-self.x) * tf.log(1 - self.x_mean + 1e-10), 1)
 
         # Add up to the cost.
         self.cost = tf.reduce_mean(self.encoder_loss + self.decoder_loss)
@@ -196,7 +202,8 @@ class Variational_Autoencoder():
         z = np.reshape(z, [self.batch_size, self.N, self.K])
 
 
-        prob = self.sess.run(self.p_x_prob, feed_dict = {self.z:z})
+        #prob = self.sess.run(self.p_x_prob, feed_dict = {self.z:z})
+        prob = self.sess.run(self.x_mean, feed_dict = {self.z:z})
         return prob
 
     def get_code(self, x):

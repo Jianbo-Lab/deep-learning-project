@@ -63,6 +63,6 @@ class Decoder:
             #net = slim.batch_norm(net)
 
         net = slim.stack(slim.flatten(z), slim.fully_connected, [256,512])
-        logits_x = slim.fully_connected(net, x_dim, activation_fn=None)
-        return logits_x
+        out = slim.fully_connected(net, x_dim, activation_fn=None)
+        return out
 
