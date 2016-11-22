@@ -11,7 +11,7 @@ slim=tf.contrib.slim
 class SSL_Gumbel():
     def __init__(self, sess, build_encoder1, build_encoder2, build_decoder, dataset_l, dataset_u,
         checkpoint_name = 'SSL_cat_checkpoint',
-        batch_size = 100, z_dim = 50, x_dim = 784, y_dim = 10, alpha = 5500.,
+        batch_size = 100, z_dim = 64, x_dim = 784, y_dim = 10, alpha = 5500.,
         learning_rate = 0.001, num_epochs = 5,load = False,load_file = None,
         checkpoint_dir = '../notebook/checkpoints/', summaries_dir = 'gumbel_log/',
         tau0=1.0, anneal_rate=0.00003, min_temp=0.5, lr_decay=0.9):
@@ -142,9 +142,10 @@ class SSL_Gumbel():
                 _, loss_value = self.sess.run([self.optimum_l, self.loss_l],
                                             feed_dict = {self.x_l: batch_x_l,
                                                         self.y_l: batch_y_l,
-                                                        self.batch_eps_l: batch_eps_l,
-                                                        self.train_phase_l:True,
-                                                        self.train_phase_u:True})
+                                                        self.batch_eps_l: batch_eps_l#,
+                                                        #self.train_phase_l:True,
+                                                        #self.train_phase_u:True
+                                                        })
                 duration = time.time() - start_time
 
 
@@ -197,8 +198,8 @@ class SSL_Gumbel():
                                             feed_dict = {self.x_u: batch_x_u,
                                                         # self.y_u: y_u,
                                                         self.batch_eps_u: batch_eps_u,
-                                                        self.train_phase_l:True,
-                                                        self.train_phase_u:True,
+                                                        #self.train_phase_l:True,
+                                                        #self.train_phase_u:True,
                                                         self.tau: self.np_temp})
                 duration = time.time() - start_time
 
@@ -277,35 +278,42 @@ class SSL_Gumbel():
         self.batch_eps_l = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps_l')
 
         # boolean for training
-        self.train_phase_l = tf.placeholder(tf.bool, name='train_phase_l')
+        #self.train_phase_l = tf.placeholder(tf.bool, name='train_phase_l')
 
 
         # Construct the mean and the variance of q(z|x).
-        self.encoder_log_sigma_sq_l, self.encoder_y_logit_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim, train_phase=self.train_phase_l)
-        self.encoder_mu_l = self.build_encoder2(h1_l, self.y_l, self.z_dim, train_phase=self.train_phase_l)
+        self.y_logit_l = self.build_encoder1(self.x_l, self.y_dim, batch_size=self.batch_size)
+        self.y_prob_l = tf.nn.softmax(self.y_logit_l)
 
-        self.encoder_y_prob_l = tf.nn.softmax(self.encoder_y_logit_l)
+
+        # self.encoder_log_sigma_sq_l, self.encoder_y_logit_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim, train_phase=self.train_phase_l)
+        #self.encoder_mu_l = self.build_encoder2(h1_l, self.y_l, self.z_dim, train_phase=self.train_phase_l)
+        self.z_mu_l, self.z_log_sigma2_l = self.build_encoder2(self.x_l, self.y_l, self.z_dim, batch_size=self.batch_size)
+
+        # self.encoder_y_prob_l = tf.nn.softmax(self.encoder_y_logit_l)
 
         # Compute z from eps and z_mean, z_sigma2.
-        self.z_l = tf.add(self.encoder_mu_l, tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma_sq_l)), self.batch_eps_l))
+        self.z_l = tf.add(self.z_mu_l, tf.mul(tf.sqrt(tf.exp(self.z_log_sigma2_l)), self.batch_eps_l))
 
         # Construct the mean of the Bernoulli distribution p(x|z).
-        self.decoder_mean_l = self.build_decoder(self.z_l, self.y_l, self.x_dim, train_phase=self.train_phase_l)
+        self.x_logit_l = self.build_decoder(self.z_l, self.y_l, self.x_dim, batch_size=self.batch_size)
+        #self.decoder_mean_l = self.build_decoder(self.z_l, self.y_l, self.x_dim, train_phase=self.train_phase_l)
+        self.x_prob_l = 1./(1. + tf.exp(-self.x_logit_l))
 
         # Compute the loss from decoder (empirically).
-        self.decoder_loss_l = -tf.reduce_sum(self.x_l * tf.log(1e-10 + self.decoder_mean_l) \
-                           + (1 - self.x_l) * tf.log(1e-10 + 1 - self.decoder_mean_l),
+        self.decoder_loss_l = -tf.reduce_sum(self.x_l * tf.log(1e-10 + self.x_prob_l) \
+                           + (1 - self.x_l) * tf.log(1e-10 + 1 - self.x_prob_l),
                            1)
         # Compute the loss from encoder (analytically).
-        self.encoder_loss_l = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma_sq_l
-                                           - tf.square(self.encoder_mu_l)
-                                           - tf.exp(self.encoder_log_sigma_sq_l), 1)
+        self.encoder_loss_l = -0.5 * tf.reduce_sum(1 + self.z_log_sigma2_l
+                                           - tf.square(self.z_mu_l)
+                                           - tf.exp(self.z_log_sigma2_l), 1)
 
         # - log p(y)
         self.label_loss_l = -self.batch_size * tf.log(1e-10 + 1./self.y_dim)
 
         # classification loss, weighted by alpha
-        self.classification_loss_l = - self.alpha * tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_l * self.y_l, 1))
+        self.classification_loss_l = - self.alpha * tf.log(1e-10 + tf.reduce_sum(self.y_prob_l * self.y_l, 1))
 
         # Add up to the cost.
         self.cost_l = tf.reduce_mean(self.encoder_loss_l + self.decoder_loss_l + self.label_loss_l + self.classification_loss_l)
@@ -328,37 +336,44 @@ class SSL_Gumbel():
         self.tau = tf.Variable(5.0,name="temperature")
 
         # boolean for training flag in batch normalization
-        self.train_phase_u = tf.placeholder(tf.bool, name='train_phase_u')
+        # self.train_phase_u = tf.placeholder(tf.bool, name='train_phase_u')
 
         # Construct the mean and the variance of q(z|x).
-        self.encoder_log_sigma_sq_u, self.encoder_y_logit_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True, train_phase=self.train_phase_u)
+        self.y_logit_u = self.build_encoder1(self.x_u, self.y_dim, reuse=True, batch_size=self.batch_size)
+        self.y_prob_u = tf.nn.softmax(self.y_logit_u)
+        #self.encoder_log_sigma_sq_u, self.encoder_y_logit_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True, train_phase=self.train_phase_u)
 
-        self.encoder_y_prob_u = tf.nn.softmax(self.encoder_y_logit_u)
+        #self.encoder_y_prob_u = tf.nn.softmax(self.encoder_y_logit_u)
 
-        self.y_u = gumbel_softmax(self.encoder_y_logit_u+1e-10, self.tau, hard=False)
+        self.y_u = gumbel_softmax(self.y_logit_u+1e-10, self.tau, hard=False)
 
-        self.encoder_mu_u = self.build_encoder2(h1_u, self.y_u, self.z_dim, reuse=True, train_phase=self.train_phase_u)
+        self.z_mu_u, self.z_log_sigma2_u = self.build_encoder2(self.x_u, self.y_u, self.z_dim, reuse=True, batch_size=self.batch_size)
+
+        # self.encoder_mu_u = self.build_encoder2(h1_u, self.y_u, self.z_dim, reuse=True, train_phase=self.train_phase_u)
 
         # Compute z from eps and z_mean, z_sigma2.
-        self.z_u = tf.add(self.encoder_mu_u, tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma_sq_u)), self.batch_eps_u))
+        self.z_u = tf.add(self.z_mu_u, tf.mul(tf.sqrt(tf.exp(self.z_log_sigma2_u)), self.batch_eps_u))
 
         # Construct the mean of the Bernoulli distribution p(x|z).
-        self.decoder_mean_u = self.build_decoder(self.z_u, self.y_u, self.x_dim, reuse=True, train_phase=self.train_phase_u)
+        self.x_logit_u = self.build_decoder(self.z_u, self.y_u, self.x_dim, reuse=True, batch_size=self.batch_size)
+        #self.decoder_mean_u = self.build_decoder(self.z_u, self.y_u, self.x_dim, reuse=True, train_phase=self.train_phase_u)
+        self.x_prob_u = 1./(1. + tf.exp(-self.x_logit_u))
+
         # Compute the loss from decoder (empirically).
 
-        self.decoder_loss_u = -tf.reduce_sum(self.x_u * tf.log(1e-10 + self.decoder_mean_u) \
-                           + (1 - self.x_u) * tf.log(1e-10 + 1 - self.decoder_mean_u),
+        self.decoder_loss_u = -tf.reduce_sum(self.x_u * tf.log(1e-10 + self.x_prob_u) \
+                           + (1 - self.x_u) * tf.log(1e-10 + 1 - self.x_prob_u),
                            1)
         # Compute the loss from encoder (analytically).
-        self.encoder_loss_u = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma_sq_u
-                                           - tf.square(self.encoder_mu_u)
-                                           - tf.exp(self.encoder_log_sigma_sq_u), 1)
+        self.encoder_loss_u = -0.5 * tf.reduce_sum(1 + self.z_log_sigma2_u
+                                           - tf.square(self.z_mu_u)
+                                           - tf.exp(self.z_log_sigma2_u), 1)
 
         # - log p(y)
         self.label_loss_u = -self.batch_size * tf.log(1e-10 + 1./self.y_dim)
 
         # extra entropy term H(q(y|x)) in loss for unlabeled data
-        self.classification_loss_u = - tf.log(1e-10 + tf.reduce_sum(self.encoder_y_prob_u * self.y_u, 1))
+        self.classification_loss_u = - tf.log(1e-10 + tf.reduce_sum(self.y_prob_u * self.y_u, 1))
 
         # Add up to the cost.
         self.cost_u = tf.reduce_mean(self.encoder_loss_u + self.decoder_loss_u + self.label_loss_u + self.classification_loss_u)
@@ -394,5 +409,7 @@ class SSL_Gumbel():
         n = x.shape[0]
         assert n <= self.batch_size, "Cannot classify more than batch size at one time."
 
-        return np.argmax(self.sess.run(self.encoder_y_logit_l, feed_dict = {self.x_l: x, self.train_phase_l:False, self.train_phase_u:False}), axis=1)
+        return np.argmax(self.sess.run(self.y_logit_l, feed_dict = {self.x_l: x,
+            #self.train_phase_l:False, self.train_phase_u:False
+            }), axis=1)
 

@@ -42,12 +42,12 @@ class SSL_Encoder1:
         z_log_sigma_sq = slim.fully_connected(net, z_dim, scope='z_log_sigma_sq', reuse=reuse)
         #z_log_sigma_sq = linear(h1, z_dim, scope = 'z_log_sigma_sq', reuse=reuse)
 
-        y_prob = tf.nn.softmax(
-            slim.batch_norm(
-                slim.fully_connected(net, y_dim, reuse=reuse, scope='y_prob'),
-                reuse=reuse, scope='y_prob_bn', is_training=train_phase
-                )
-            )
+        y_logit = #tf.nn.softmax(
+            #slim.batch_norm(
+                slim.fully_connected(net, y_dim, reuse=reuse, scope='y_prob')#,
+                #reuse=reuse, scope='y_prob_bn', is_training=train_phase
+                #)
+            #)
 
         #y_prob = tf.nn.softmax(batch_norm_layer(
             #linear(h1, y_dim, scope = 'y_prob', reuse=reuse),
@@ -57,7 +57,7 @@ class SSL_Encoder1:
         #h2 = tf.nn.softplus(linear(tf.concat(1, (h1, labels)), self.hidden_dims, scope = 'en_fc2'))
 
         #z_log_sigma_sq = linear(h2, z_dim, scope = 'z_log_sigma')
-        return (z_log_sigma_sq, y_prob, net)
+        return (z_log_sigma_sq, y_logit, net)
 
 class SSL_Encoder2:
     def __init__(self, hidden_dim = 256):

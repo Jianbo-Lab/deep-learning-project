@@ -1,10 +1,11 @@
 import numpy as np
 import tensorflow as tf
 from ops import *
+slim=tf.contrib.slim
 
 class SSL_Encoder1:
-    def __init__(self, hidden_dim = 100):
-        self.hidden_dim = hidden_dim
+    def __init__(self, hidden_dims = [100,100]):
+        self.hidden_dims = hidden_dims
 
     def __call__(self, x, z_dim, y_dim, reuse=None, train_phase=True):
         """
@@ -23,6 +24,14 @@ class SSL_Encoder1:
         """
 
 
+        net = x
+        for i in xrange(len(self.hidden_dims)):
+            net = slim.fully_connected(net, self.hidden_dims[i], reuse=reuse, scope='enc_fc{}'.format(i))
+            net = slim.batch_norm(net, activation_fn=tf.nn.softplus, reuse=reuse, is_training=train_phase, scope='enc_bn{}'.format(i), scale=True, updates_collections=None)
+        h1 = net
+
+
+        """
         h0 = tf.nn.softplus(batch_norm_layer(
             linear(x, self.hidden_dim, scope = 'en_fc0', reuse=reuse),
             train_phase=train_phase, scope_bn='en_bn0', reuse=reuse
@@ -32,17 +41,28 @@ class SSL_Encoder1:
             linear(h0, self.hidden_dim, scope = 'en_fc1', reuse=reuse),
             train_phase=train_phase, scope_bn='en_bn1', reuse=reuse
             ))
+        """
+
+        z_log_sigma_sq = slim.fully_connected(h1, z_dim, scope='z_log_sigma_sq', reuse=reuse)
+
+
+
+        y_prob = slim.batch_norm(
+            slim.fully_connected(h1, y_dim, scope='y_prob', reuse=reuse),
+            is_training=train_phase, scope='y_prob_bn', reuse=reuse, activation_fn=tf.nn.softmax,
+            scale=True, updates_collections=None
+            )
+
+
+        """
 
         z_log_sigma_sq = linear(h1, z_dim, scope = 'z_log_sigma_sq', reuse=reuse)
-
         y_prob = tf.nn.softmax(batch_norm_layer(
             linear(h1, y_dim, scope = 'y_prob', reuse=reuse),
             train_phase=train_phase, scope_bn='y_prob_bn', reuse=reuse
             ))
 
-        #h2 = tf.nn.softplus(linear(tf.concat(1, (h1, labels)), self.hidden_dim, scope = 'en_fc2'))
-
-        #z_log_sigma_sq = linear(h2, z_dim, scope = 'z_log_sigma')
+        """
         return (z_log_sigma_sq, y_prob, h1)
 
 class SSL_Encoder2:
@@ -63,12 +83,24 @@ class SSL_Encoder2:
 
         """
 
+
+        h2 = slim.batch_norm(
+            slim.fully_connected(tf.concat(1, (h1,y)), self.hidden_dim, scope='enc2_fc', reuse=reuse),
+            is_training=train_phase, scope='enc2_bn', reuse=reuse, activation_fn=tf.nn.softplus,
+            scale=True, updates_collections=None
+            )
+
+        z_mu = slim.fully_connected(h2, z_dim, scope='z_mu', reuse=reuse)
+
+        """
         h2 = tf.nn.softplus(batch_norm_layer(
             linear(tf.concat(1, (h1, y)), self.hidden_dim, scope = 'en_fc2', reuse=reuse),
             train_phase=train_phase, scope_bn='en_bn2', reuse=reuse
             ))
-
         z_mu= linear(h2, z_dim, scope = 'z_mu', reuse=reuse)
+
+
+        """
         return z_mu
 
 class SSL_Decoder:
@@ -89,6 +121,22 @@ class SSL_Decoder:
         x_mean: A batch of the means of p(x|y,z)
         """
 
+
+
+        net = tf.concat(1, (z,y))
+        for i in xrange(len(self.hidden_dims)):
+            net = slim.fully_connected(net, self.hidden_dims[i], scope='dec_fc{}'.format(i), reuse=reuse)
+            net = slim.batch_norm(net, scope='dec_bn{}'.format(i), reuse=reuse, is_training=train_phase, activation_fn=tf.nn.softplus, scale=True, updates_collections=None)
+
+
+        x_mean = #slim.batch_norm(
+            slim.fully_connected(net, img_dim, reuse=reuse, scope='x_mean',
+            activation_fn=tf.nn.sigmoid)#,
+            #scope='x_mean_bn', reuse=reuse, is_training=train_phase, activation_fn=tf.nn.sigmoid,
+            #scale=True, updates_collections=None
+            #)
+
+        """
         h0 = tf.nn.softplus(batch_norm_layer(
             linear(tf.concat(1, (z, y)), self.hidden_dim, scope = 'de_fc0', reuse=reuse),
             train_phase=train_phase, scope_bn='de_bn0', reuse=reuse
@@ -98,11 +146,13 @@ class SSL_Decoder:
             linear(h0, self.hidden_dim, scope = 'de_fc1', reuse=reuse),
             train_phase=train_phase, scope_bn='de_bn1', reuse=reuse
             ))
-
         x_mean = tf.nn.sigmoid(batch_norm_layer(
             linear(h1, img_dim, scope = 'x_mean', reuse=reuse),
             train_phase=train_phase, scope_bn='x_mean_bn', reuse=reuse
             ))
+        """
+
+
         return x_mean
 
 
