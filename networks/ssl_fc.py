@@ -4,8 +4,8 @@ from ops import *
 slim=tf.contrib.slim
 
 class SSL_Encoder1:
-    def __init__(self, hidden_dims = [100,100]):
-        self.hidden_dims = hidden_dims
+    def __init__(self, hidden_dim = 100):
+        self.hidden_dim = hidden_dim
 
     def __call__(self, x, z_dim, y_dim, reuse=None, train_phase=True):
         """
@@ -23,6 +23,8 @@ class SSL_Encoder1:
 
         """
 
+        """
+        self.hidden_dims = np.array([self.hidden_dim, self.hidden_dim])
 
         net = x
         for i in xrange(len(self.hidden_dims)):
@@ -62,7 +64,7 @@ class SSL_Encoder1:
             train_phase=train_phase, scope_bn='y_prob_bn', reuse=reuse
             ))
 
-        """
+
         return (z_log_sigma_sq, y_prob, h1)
 
 class SSL_Encoder2:
@@ -83,6 +85,8 @@ class SSL_Encoder2:
 
         """
 
+        """
+
 
         h2 = slim.batch_norm(
             slim.fully_connected(tf.concat(1, (h1,y)), self.hidden_dim, scope='enc2_fc', reuse=reuse),
@@ -90,7 +94,7 @@ class SSL_Encoder2:
             scale=True, updates_collections=None
             )
 
-        z_mu = slim.fully_connected(h2, z_dim, scope='z_mu', reuse=reuse)
+        z_mu = slim.fully_connected(h2, z_dim, scope='z_mu', reuse=reuse, activation_fn=None)
 
         """
         h2 = tf.nn.softplus(batch_norm_layer(
@@ -100,7 +104,7 @@ class SSL_Encoder2:
         z_mu= linear(h2, z_dim, scope = 'z_mu', reuse=reuse)
 
 
-        """
+
         return z_mu
 
 class SSL_Decoder:
@@ -121,6 +125,9 @@ class SSL_Decoder:
         x_mean: A batch of the means of p(x|y,z)
         """
 
+        """
+
+        self.hidden_dims = np.array([self.hidden_dim, self.hidden_dim])
 
 
         net = tf.concat(1, (z,y))
@@ -128,13 +135,12 @@ class SSL_Decoder:
             net = slim.fully_connected(net, self.hidden_dims[i], scope='dec_fc{}'.format(i), reuse=reuse)
             net = slim.batch_norm(net, scope='dec_bn{}'.format(i), reuse=reuse, is_training=train_phase, activation_fn=tf.nn.softplus, scale=True, updates_collections=None)
 
-
-        x_mean = #slim.batch_norm(
+        x_mean = slim.batch_norm(
             slim.fully_connected(net, img_dim, reuse=reuse, scope='x_mean',
-            activation_fn=tf.nn.sigmoid)#,
-            #scope='x_mean_bn', reuse=reuse, is_training=train_phase, activation_fn=tf.nn.sigmoid,
-            #scale=True, updates_collections=None
-            #)
+            activation_fn=tf.nn.sigmoid),
+            scope='x_mean_bn', reuse=reuse, is_training=train_phase, activation_fn=tf.nn.sigmoid,
+            scale=True, updates_collections=None
+            )
 
         """
         h0 = tf.nn.softplus(batch_norm_layer(
@@ -150,8 +156,6 @@ class SSL_Decoder:
             linear(h1, img_dim, scope = 'x_mean', reuse=reuse),
             train_phase=train_phase, scope_bn='x_mean_bn', reuse=reuse
             ))
-        """
-
 
         return x_mean
 

@@ -72,17 +72,26 @@ class SSL_M2():
         # Compute the objective function.
         self.loss_l = self.build_vae_l()
         self.loss_u = self.build_vae_u()
+
+        """
         self.summary_l = tf.scalar_summary('loss for labeled data', self.loss_l)
         self.summary_u = tf.scalar_summary('loss for unlabeled data', self.loss_u)
 
         merged = tf.merge_all_summaries()
         self.summary_writer = tf.train.SummaryWriter(self.summaries_dir,self.sess.graph)
+        """
+
+        self.num_epoch = 0
+        self.num_iter = 0
+        self.log = []
+
         # Get optimizers
         self.optimum_l = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss_l, global_step=global_step)
         self.optimum_u = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss_u, global_step=global_step)
 
         # Lay down the graph for computing accuracy.
 
+        """
         self.y_ = tf.placeholder(tf.float32,[self.batch_size, self.y_dim], name = 'y_')
 
         with tf.name_scope('accuracy'):
@@ -91,6 +100,7 @@ class SSL_M2():
             with tf.name_scope('accuracy'):
                 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
             self.summary_acc = tf.scalar_summary('training accuracy', accuracy)
+        """
 
         # Initialize
         init = tf.initialize_all_variables()
@@ -134,6 +144,12 @@ class SSL_M2():
 
                 avg_loss_value += loss_value / self.n_samples_l * self.batch_size
 
+                self.num_iter += 1
+
+                if self.num_iter % 100 == 1:
+                    self.log.append([self.num_iter, loss_value])
+
+                """
                 if b % 10 == 0:
                     # Add training loss_l to self.summary_writer.
                     summary = self.sess.run(self.summary_l, feed_dict = {self.x_l: batch_x_l,
@@ -150,6 +166,7 @@ class SSL_M2():
                             self.y_: batch_y_l, self.train_phase_l:False, self.train_phase_u:False})
 
                     self.summary_writer.add_summary(summary, b + epoch * num_batches_l)
+                """
 
 
             for b in xrange(num_batches_u):
@@ -177,6 +194,12 @@ class SSL_M2():
 
                 avg_loss_value += loss_value / self.n_samples_u * self.batch_size
 
+                self.num_iter += 1
+
+                if self.num_iter % 100 == 1:
+                    self.log.append([self.num_iter, loss_value])
+
+                """
                 if b % 10 == 0:
                     # Add training loss_l to self.summary_writer.
                     summary = self.sess.run(self.summary_u, feed_dict = {self.x_u: batch_x_u,
@@ -186,11 +209,12 @@ class SSL_M2():
                                                         self.train_phase_u:False})
 
                     self.summary_writer.add_summary(summary, b + epoch * num_batches_u)
+                """
 
+            self.num_epoch += 1
+            print 'Epoch {} loss: {}'.format(self.num_epoch, avg_loss_value)
 
-            print 'Epoch {} loss: {}'.format(epoch + 1, avg_loss_value)
-
-        self.summary_writer.close()
+        #self.summary_writer.close()
         self.save(epoch)
 
     def save(self,epoch):
