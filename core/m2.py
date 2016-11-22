@@ -10,7 +10,7 @@ class SSL_M2():
     def __init__(self, sess, build_encoder1, build_encoder2, build_decoder, dataset_l, dataset_u,
         checkpoint_name = 'SSL_M2_checkpoint',
         batch_size = 100, z_dim = 20, x_dim = 784, y_dim = 10, alpha = 5500.,
-        learning_rate = 0.001, num_epochs = 5,load = False,load_file = None,
+        learning_rate = 0.001, lr_decay=0.95, lr_decay_freq=1000, num_epochs = 5,load = False,load_file = None,
         checkpoint_dir = '../notebook/checkpoints/', summaries_dir = 'm2_logs/'):
         """
         Inputs:
@@ -53,6 +53,9 @@ class SSL_M2():
         self.checkpoint_dir = checkpoint_dir
         self.alpha = alpha
         self.summaries_dir = summaries_dir
+        self.lr_decay=lr_decay
+        self.lr_decay_freq=lr_decay_freq
+
         # if dataset == 'mnist':
         #     # Load MNIST data in a format suited for tensorflow.
         #     self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
@@ -84,10 +87,11 @@ class SSL_M2():
         self.num_epoch = 0
         self.num_iter = 0
         self.log = []
+        self.lr = tf.constant(self.learning_rate)
 
         # Get optimizers
-        self.optimum_l = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss_l, global_step=global_step)
-        self.optimum_u = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss_u, global_step=global_step)
+        self.optimum_l = tf.train.AdamOptimizer(self.lr).minimize(self.loss_l, global_step=global_step)
+        self.optimum_u = tf.train.AdamOptimizer(self.lr).minimize(self.loss_u, global_step=global_step)
 
         # Lay down the graph for computing accuracy.
 
@@ -135,7 +139,8 @@ class SSL_M2():
                                                         self.y_l: batch_y_l,
                                                         self.batch_eps_l: batch_eps_l,
                                                         self.train_phase_l:True,
-                                                        self.train_phase_u:True})
+                                                        self.train_phase_u:True,
+                                                        self.lr: self.learning_rate})
                 duration = time.time() - start_time
 
 
@@ -146,8 +151,12 @@ class SSL_M2():
 
                 self.num_iter += 1
 
+
                 if self.num_iter % 100 == 1:
-                    self.log.append([self.num_iter, loss_value])
+                    self.log.append([self.num_iter, loss_value, self.learning_rate])
+                if self.num_iter % self.lr_decay_freq == 1:
+                    self.learning_rate *= self.lr_decay
+
 
                 """
                 if b % 10 == 0:
@@ -186,7 +195,8 @@ class SSL_M2():
                                                         self.y_u: y_u,
                                                         self.batch_eps_u: batch_eps_u,
                                                         self.train_phase_l:True,
-                                                        self.train_phase_u:True})
+                                                        self.train_phase_u:True,
+                                                        self.lr: self.learning_rate})
                 duration = time.time() - start_time
 
 
@@ -197,7 +207,9 @@ class SSL_M2():
                 self.num_iter += 1
 
                 if self.num_iter % 100 == 1:
-                    self.log.append([self.num_iter, loss_value])
+                    self.log.append([self.num_iter, loss_value, self.learning_rate])
+                if self.num_iter % self.lr_decay_freq == 1:
+                    self.learning_rate *= self.lr_decay
 
                 """
                 if b % 10 == 0:
