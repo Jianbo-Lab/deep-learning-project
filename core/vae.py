@@ -90,10 +90,17 @@ class Variational_Autoencoder():
 
                 # Run a step of adam optimization and loss computation.
                 start_time = time.time()
-                _, loss_value = self.sess.run([self.optimum,self.loss],
+                _, loss_value, em, es, dm, el, dl = self.sess.run([self.optimum,self.loss, self.encoder_mean, self.encoder_log_sigma2, self.decoder_mean, self.encoder_loss, self.decoder_loss],
                                             feed_dict = {self.images: batch_images,
                                                         self.batch_eps: batch_eps})
                 duration = time.time() - start_time
+
+                print 'em: {}'.format(em)
+                print 'es: {}'.format(es)
+                print 'dm: {}'.format(dm)
+                print 'maxdm: {}'.format(np.amax(dm))
+                print 'el: {}'.format(el)
+                print 'dl: {}'.format(dl)
 
                 assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
@@ -142,16 +149,16 @@ class Variational_Autoencoder():
         # Construct the mean of the Bernoulli distribution p(x|z).
         self.decoder_mean = self.build_decoder(self.batch_z,self.img_dim)
         # Compute the loss from decoder (empirically).
-        decoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) \
+        self.decoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) \
                            + (1 - self.images) * tf.log(1e-10 + 1 - self.decoder_mean),
                            1)
         # Compute the loss from encoder (analytically).
-        encoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2
+        self.encoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2
                                            - tf.square(self.encoder_mean)
                                            - tf.exp(self.encoder_log_sigma2), 1)
 
         # Add up to the cost.
-        self.cost = tf.reduce_mean(encoder_loss + decoder_loss)
+        self.cost = tf.reduce_mean(self.encoder_loss + self.decoder_loss)
 
         return self.cost
 

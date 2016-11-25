@@ -66,8 +66,7 @@ class Decoder:
             net = slim.fully_connected(net, self.hidden_dims[i], scope='dec_fc{}'.format(i),
                 activation_fn=tf.nn.softplus, reuse=reuse)
 
-        x_mean = slim.fully_connected(net, x_dim, scope='x_mean',
-            activation_fn=tf.nn.sigmoid, reuse=reuse)
+        x_mean = slim.fully_connected(net, x_dim, scope='x_mean', activation_fn=tf.nn.sigmoid, reuse=reuse)
 
         """
         h0 = tf.nn.softplus(linear(z, self.hidden_dim, scope = 'de_fc0'))

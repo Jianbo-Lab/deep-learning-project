@@ -1,2 +1,2 @@
-model_checkpoint_path: "SSL_M2_checkpoint_600"
-all_model_checkpoint_paths: "SSL_M2_checkpoint_600"
+model_checkpoint_path: "test"
+all_model_checkpoint_paths: "test"
