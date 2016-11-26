@@ -31,12 +31,21 @@ build_decoder = Decoder(512)
 build_discriminator = Discriminator(1024)
 
 # as the number of labeled examples decreases, need alpha to decrease as well?
-model = VAEGAN(sess, build_encoder, build_decoder, build_discriminator, dataset=mnist.train,
+if len(sys.argv) == 1:
+    model = VAEGAN(sess, build_encoder, build_decoder, build_discriminator, dataset=mnist.train,
             batch_size = 100, z_dim = 50, x_dim = 784,
-           learning_rate = 1e-3, num_epochs = 10, load=False, lr_decay=1.,
-          checkpoint_name='vaegan_fc_checkpoint'
-)
+           learning_rate = 1e-3, num_epochs = 2, load=False, lr_decay=1.,
+          checkpoint_name='vaegan_fc_checkpoint', checkpoint_dir = './'
+    )
+else:
+    model = VAEGAN(sess, build_encoder, build_decoder, build_discriminator, dataset=mnist.train,
+            batch_size = 100, z_dim = 50, x_dim = 784,
+           learning_rate = 1e-3, num_epochs = 2, load=False, lr_decay=1.,
+               load_file = sys.argv[1],
+               checkpoint_name='vaegan_fc_checkpoint_loaded', checkpoint_dir = './'
+    )
 
 model.train()
+
 
 

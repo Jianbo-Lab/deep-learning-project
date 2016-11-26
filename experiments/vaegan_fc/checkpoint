@@ -1,0 +1,2 @@
+model_checkpoint_path: "vaegan_fc_checkpoint-2"
+all_model_checkpoint_paths: "vaegan_fc_checkpoint-2"
