@@ -182,8 +182,12 @@ class CVAEGAN():
             self.eps = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps')
 
             # Construct the mean and the variance of q(z|x).
-            #self.z_mean, self.z_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
-            self.z_mean, self.z_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim)
+            # use this line for fc
+            self.z_mean, self.z_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
+            # use this line for conv
+            #self.z_mean, self.z_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim)
+
+
             # Compute z from eps and z_mean, z_sigma2.
             self.z = tf.add(self.z_mean, tf.mul(tf.sqrt(tf.exp(self.z_log_sigma2)), self.eps))
             # Construct the mean of the Bernoulli distribution p(x|z).
