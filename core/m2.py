@@ -118,11 +118,15 @@ class SSL_M2():
     def train(self):
         """ Train VAE for a number of steps."""
 
+        start_time = time.time()
+
         num_batches_l = int(self.n_samples_l / self.batch_size)
         num_batches_u = int(self.n_samples_u / self.batch_size)
 
         for epoch in xrange(self.num_epochs):
             avg_loss_value = 0.
+
+            epoch_start = time.time()
 
             # Process labeled batch
             for b in xrange(num_batches_l):
@@ -224,15 +228,18 @@ class SSL_M2():
                 """
 
             self.num_epoch += 1
-            print 'Epoch {} loss: {}'.format(self.num_epoch, avg_loss_value)
-
+            epoch_end = time.time()
+            print 'Epoch {} loss: {} (time: {} s)'.format(self.num_epoch, avg_loss_value, epoch_end-epoch_start)
+            self.save(self.num_epoch)
+        end_time = time.time()
+        print '{} min'.format((end_time-start_time)/60.)
         #self.summary_writer.close()
-        self.save(epoch)
+        #self.save(epoch)
 
     def save(self,epoch):
         self.saver = tf.train.Saver()
         #self.saver.save(self.sess, os.path.join(self.checkpoint_dir, self.checkpoint_name), global_step = epoch)
-        self.saver.save(self.sess, os.path.join(self.checkpoint_dir, self.checkpoint_name))
+        self.saver.save(self.sess, os.path.join(self.checkpoint_dir, self.checkpoint_name), global_step=epoch)
 
 
     def input_l(self):

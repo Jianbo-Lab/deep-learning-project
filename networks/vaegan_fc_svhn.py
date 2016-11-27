@@ -7,7 +7,7 @@ class Encoder:
     def __init__(self, hidden_dim = 100):
         self.hidden_dim = hidden_dim
 
-    def __call__(self, x, z_dim, reuse=None):
+    def __call__(self, x, z_dim, train_phase=True, reuse=None):
         """
         The probabilistic encoder which computes the mean and the log
         of variance of z drawn from the Gaussian distribution q(z|images).
@@ -26,7 +26,17 @@ class Encoder:
         net = x
         for i in xrange(len(self.hidden_dims)):
             net = slim.fully_connected(net, self.hidden_dims[i], scope='enc_fc{}'.format(i),
-                activation_fn=tf.nn.softplus)
+                reuse=reuse,
+                activation_fn=tf.nn.softplus,
+                #normalizer_fn=slim.batch_norm,
+                #normalizer_params={
+                #    'reuse': reuse,
+                #    'is_training':train_phase,
+                #    'scale':True,
+                #    'updates_collections':None,
+                #    'scope':'enc_bn{}'.format(i)
+                #}
+                )
         z_mean = slim.fully_connected(net, z_dim, scope='z_mean',
             activation_fn=None)
         z_log_sigma_sq = slim.fully_connected(net, z_dim, scope='z_log_sigma',
@@ -47,7 +57,7 @@ class Decoder:
     def __init__(self, hidden_dim = 100):
         self.hidden_dim = hidden_dim
 
-    def __call__(self, z, x_dim, reuse=None):
+    def __call__(self, z, x_dim, reuse=None, train_phase=True):
         """
         The probabilistic decoder which computes the mean of x drawn from
         the Bernoulli distribution p(x|z).
@@ -64,7 +74,16 @@ class Decoder:
         net = z
         for i in xrange(len(self.hidden_dims)):
             net = slim.fully_connected(net, self.hidden_dims[i], scope='dec_fc{}'.format(i),
-                activation_fn=tf.nn.softplus, reuse=reuse)
+                activation_fn=tf.nn.softplus, reuse=reuse,
+                #normalizer_fn=slim.batch_norm,
+                #normalizer_params={
+                #    'reuse': reuse,
+                #    'is_training':train_phase,
+                #    'scale':True,
+                #    'updates_collections':None,
+                #    'scope':'dec_bn{}'.format(i)
+                #}
+                )
 
         x_mean = slim.fully_connected(net, x_dim, scope='x_mean', activation_fn=tf.nn.sigmoid, reuse=reuse)
 
@@ -80,13 +99,22 @@ class Decoder:
 class Discriminator:
     def  __init__(self, hidden_dim = 100):
         self.hidden_dim = hidden_dim
-    def __call__(self, x, reuse=None):
+    def __call__(self, x, reuse=None, train_phase=True):
 
         self.hidden_dims = [self.hidden_dim] * 4
         net = x
         for i in xrange(len(self.hidden_dims)):
             net = slim.fully_connected(net, self.hidden_dims[i], scope='dis_fc{}'.format(i),
-                activation_fn=tf.tanh, reuse=reuse)
+                activation_fn=tf.tanh, reuse=reuse,
+                #normalizer_fn=slim.batch_norm,
+                #normalizer_params={
+                #    'reuse': reuse,
+                #    'is_training':train_phase,
+                #    'scale':True,
+                #    'updates_collections':None,
+                #    'scope':'enc_bn{}'.format(i)
+                #}
+                )
         p = slim.fully_connected(net, 1, scope='p', activation_fn=tf.nn.sigmoid, reuse=reuse)
         return p
 

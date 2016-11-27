@@ -9,7 +9,7 @@ import os
 class VAEGAN():
     def __init__(self, sess, build_encoder, build_decoder, build_discriminator, checkpoint_name = 'vae_checkpoint',
         batch_size = 100, z_dim = 20, x_dim = 784, dataset = 'mnist',
-        learning_rate = 0.001, lr_decay=0.95, lr_decay_freq=1000, num_epochs = 5,load = False,load_file = None,
+        learning_rate = 0.001, lr_decay=0.95, lr_decay_freq=1000, num_epochs = 5,load = False,load_file = None, gamma = 1.,
         checkpoint_dir = '../notebook/checkpoints/'):
         """
         Inputs:
@@ -45,6 +45,7 @@ class VAEGAN():
         self.checkpoint_dir = checkpoint_dir
         self.lr_decay=lr_decay
         self.lr_decay_freq=lr_decay_freq
+        self.gamma = gamma # down-weight GAN loss
         # if dataset == 'mnist':
         #     # Load MNIST data in a format suited for tensorflow.
         #     self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
@@ -113,13 +114,15 @@ class VAEGAN():
                                             feed_dict = {self.x: batch_images,
                                                         self.eps: batch_eps,
                                                         self.z_fresh: batch_eps2,
-                                                        self.lr: self.learning_rate})
+                                                        self.lr: self.learning_rate,
+                                                        self.train_phase: True})
                 _, dis_loss = self.sess.run([self.dis_opt, self.dis_loss],
                                             feed_dict = {self.x: batch_images,
                                                         #self.eps: batch_eps,
                                                         self.x_fresh: x_fresh,
                                                         self.x_mean: x_mean,
-                                                        self.lr: self.learning_rate})
+                                                        self.lr: self.learning_rate,
+                                                        self.train_phase: True})
                 loss_value = vae_loss + dis_loss
 
                 duration = time.time() - start_time
@@ -168,6 +171,8 @@ class VAEGAN():
         This function builds up VAE from encoder and decoder function
         in the global environment.
         """
+        self.train_phase = tf.placeholder(tf.bool, name='train_phase')
+
         # Add a placeholder for one batch of images
         with tf.variable_scope('G'):
             self.x = tf.placeholder(tf.float32,[self.batch_size,self.x_dim],
@@ -178,12 +183,12 @@ class VAEGAN():
 
             # Construct the mean and the variance of q(z|x).
             self.z_mean, self.z_log_sigma2 = \
-                self.build_encoder(self.x, self.z_dim)
+                self.build_encoder(self.x, self.z_dim, train_phase=self.train_phase)
             # Compute z from eps and z_mean, z_sigma2.
             self.z = tf.add(self.z_mean, \
                             tf.mul(tf.sqrt(tf.exp(self.z_log_sigma2)), self.eps))
             # Construct the mean of the Bernoulli distribution p(x|z).
-            self.x_mean = self.build_decoder(self.z,self.x_dim)
+            self.x_mean = self.build_decoder(self.z,self.x_dim, train_phase=self.train_phase)
             # Compute the loss from decoder (empirically).
             self.decoder_loss = -tf.reduce_sum(self.x * tf.log(1e-10 + self.x_mean) \
                                + (1 - self.x) * tf.log(1e-10 + 1 - self.x_mean),
@@ -194,21 +199,21 @@ class VAEGAN():
                                                - tf.exp(self.z_log_sigma2), 1)
 
             self.z_fresh = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'z_fresh')
-            self.x_fresh = self.build_decoder(self.z_fresh, self.x_dim, reuse=True)
+            self.x_fresh = self.build_decoder(self.z_fresh, self.x_dim, reuse=True, train_phase=self.train_phase)
 
         with tf.variable_scope('D'):
             # true image
-            self.dis_real = self.build_discriminator(self.x)
+            self.dis_real = self.build_discriminator(self.x, train_phase=self.train_phase)
             # reconstruction
-            self.dis_fake_recon = self.build_discriminator(self.x_mean, reuse=True)
+            self.dis_fake_recon = self.build_discriminator(self.x_mean, reuse=True, train_phase=self.train_phase)
             # fresh generation
-            self.dis_fake_fresh = self.build_discriminator(self.x_fresh, reuse=True)
+            self.dis_fake_fresh = self.build_discriminator(self.x_fresh, reuse=True, train_phase=self.train_phase)
 
         dis_loss = tf.reduce_mean(-tf.log(self.dis_real+1e-10) - tf.log(1.-self.dis_fake_fresh+1e-10) - tf.log(1.-self.dis_fake_recon+1e-10))
 
 
         # Add up to the cost.
-        vae_loss = tf.reduce_mean(self.encoder_loss + self.decoder_loss - tf.log(self.dis_fake_fresh+1e-10) - tf.log(self.dis_fake_recon+1e-10))
+        vae_loss = tf.reduce_mean(self.encoder_loss + self.decoder_loss - tf.log(self.dis_fake_fresh+1e-10) - self.gamma * tf.log(self.dis_fake_recon+1e-10))
 
         return vae_loss, dis_loss
 
@@ -227,7 +232,7 @@ class VAEGAN():
         sampled_z = np.random.randn(self.batch_size,self.z_dim)
 
         return self.sess.run(self.x_mean,\
-                      feed_dict = {self.z:sampled_z})
+                      feed_dict = {self.z:sampled_z, self.train_phase:False})
 
     def get_code(self, img):
         return self.sess.run(self.z_mean, feed_dict={self.x:img})
