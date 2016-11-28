@@ -11,7 +11,7 @@ class Conditional_Variational_Autoencoder():
         checkpoint_name = 'cvae_checkpoint',
         batch_size = 100, z_dim = 20, x_dim = 784, #dataset = 'mnist',
         learning_rate = 0.001,lr_decay=0.95, lr_decay_freq=1000, num_epochs = 5,
-        #condition_on_label = False, get_cond_info = None,
+        condition_on_label = True, get_cond_info = None,
         cond_info_dim = 10,
         load=False, load_file = None, checkpoint_dir = './checkpoints/',
         model = None, layer = 3):
@@ -44,8 +44,8 @@ class Conditional_Variational_Autoencoder():
         self.learning_rate = learning_rate
         self.dataset = dataset
         self.num_epochs = num_epochs
-        #self.get_cond_info = get_cond_info
-        #self.condition_on_label = condition_on_label
+        self.get_cond_info = get_cond_info
+        self.condition_on_label = condition_on_label
         self.cond_info_dim = cond_info_dim
         self.load = load
         self.load_file = load_file
@@ -59,8 +59,8 @@ class Conditional_Variational_Autoencoder():
         #assert (not (get_cond_info is None)) or condition_on_label, \
         #"Need to specify conditional information"
 
-        #if condition_on_label:
-            #self.cond_info_dim = 10
+        if condition_on_label:
+            self.cond_info_dim = 10
 
 
         #if dataset == 'mnist' and load == False:
@@ -166,8 +166,10 @@ class Conditional_Variational_Autoencoder():
         This function reads in one batch of data.
         """
         batch_images, batch_labels = self.dataset.next_batch(self.batch_size)
-        #if self.condition_on_label:
-        batch_info = batch_labels
+        if self.condition_on_label:
+            batch_info = batch_labels
+        else:
+            batch_info = self.get_cond_info(batch_images)
 
         if not (self.model is None):
             feats = get_feats(batch_images, self.mean_img, self.model, self.layer)
@@ -205,7 +207,9 @@ class Conditional_Variational_Autoencoder():
 
         # Construct the mean and the variance of q(z|x).
 
+        # fc
         #self.encoder_mean, self.encoder_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
+        # conv
         self.encoder_mean, self.encoder_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim)
 
 

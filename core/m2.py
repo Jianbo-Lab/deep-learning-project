@@ -11,7 +11,7 @@ class SSL_M2():
         checkpoint_name = 'SSL_M2_checkpoint',
         batch_size = 100, z_dim = 20, x_dim = 784, y_dim = 10, alpha = 5500.,
         learning_rate = 0.001, lr_decay=0.95, lr_decay_freq=1000, num_epochs = 5,load = False,load_file = None,
-        checkpoint_dir = '../notebook/checkpoints/', summaries_dir = 'm2_logs/'):
+        checkpoint_dir = '../notebook/checkpoints/', summaries_dir = 'm2_logs/', x_width=28):
         """
         Inputs:
         sess: TensorFlow session.
@@ -55,6 +55,7 @@ class SSL_M2():
         self.summaries_dir = summaries_dir
         self.lr_decay=lr_decay
         self.lr_decay_freq=lr_decay_freq
+        self.x_width=x_width
 
         # if dataset == 'mnist':
         #     # Load MNIST data in a format suited for tensorflow.
@@ -284,7 +285,11 @@ class SSL_M2():
 
 
         # Construct the mean and the variance of q(z|x).
-        self.encoder_log_sigma_sq_l, self.encoder_y_prob_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim, train_phase=self.train_phase_l)
+        # fc
+        #self.encoder_log_sigma_sq_l, self.encoder_y_prob_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim, train_phase=self.train_phase_l)
+        # conv
+        self.encoder_log_sigma_sq_l, self.encoder_y_prob_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim, train_phase=self.train_phase_l, x_width=self.x_width)
+
         self.encoder_mu_l = self.build_encoder2(h1_l, self.y_l, self.z_dim, train_phase=self.train_phase_l)
 
         # Compute z from eps and z_mean, z_sigma2.
@@ -330,7 +335,12 @@ class SSL_M2():
         self.train_phase_u = tf.placeholder(tf.bool, name='train_phase_u')
 
         # Construct the mean and the variance of q(z|x).
-        self.encoder_log_sigma_sq_u, self.encoder_y_prob_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True, train_phase=self.train_phase_u)
+        # fc
+        #self.encoder_log_sigma_sq_u, self.encoder_y_prob_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True, train_phase=self.train_phase_u)
+        #conv
+        self.encoder_log_sigma_sq_u, self.encoder_y_prob_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True, train_phase=self.train_phase_u, x_width=self.x_width)
+
+
         self.encoder_mu_u = self.build_encoder2(h1_u, self.y_u, self.z_dim, reuse=True, train_phase=self.train_phase_u)
 
         # Compute z from eps and z_mean, z_sigma2.

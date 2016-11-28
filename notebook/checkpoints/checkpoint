@@ -1,2 +1,2 @@
-model_checkpoint_path: "SSL_M2_checkpoint-6"
-all_model_checkpoint_paths: "SSL_M2_checkpoint-6"
+model_checkpoint_path: "cvaegan_svhn-5"
+all_model_checkpoint_paths: "cvaegan_svhn-5"
