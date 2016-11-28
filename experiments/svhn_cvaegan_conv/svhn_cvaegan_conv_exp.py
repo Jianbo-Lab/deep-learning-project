@@ -35,8 +35,8 @@ def mat2dataset(filepath):
     x = x.astype(float)/255.
     return DataSet(x,y,dtype=dtypes.float32, reshape=False)
 
-svhn_train = mat2dataset('../../notebook/SVHN/train_32x32.mat')
-svhn_test = mat2dataset('../../notebook/SVHN/test_32x32.mat')
+svhn_train = mat2dataset('SVHN/train_32x32.mat')
+#svhn_test = mat2dataset('../../notebook/SVHN/test_32x32.mat')
 
 print 'Loaded SVHN'
 
