@@ -196,9 +196,9 @@ class CVAEGAN():
             depending on whether the encoder/decoder is fully connected or convolutional
             """
             # use this line for fc:
-            self.z_mean, self.z_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
+            #self.z_mean, self.z_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
             # use this line for conv:
-            #self.z_mean, self.z_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim, x_width=self.x_width)
+            self.z_mean, self.z_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim, x_width=self.x_width)
 
 
             # Compute z from eps and z_mean, z_sigma2.
@@ -226,17 +226,17 @@ class CVAEGAN():
 
             # true image
             self.dis_real = self.build_discriminator(self.x,
-                #x_width=self.x_width
+                x_width=self.x_width
                 )
 
             # reconstruction
             self.dis_fake_recon = self.build_discriminator(self.x_mean, reuse=True,
-                #x_width=self.x_width
+                x_width=self.x_width
                 )
 
             # fresh generation
             self.dis_fake_fresh = self.build_discriminator(self.x_fresh, reuse=True,
-                #x_width=self.x_width
+                x_width=self.x_width
             )
 
         dis_loss = tf.reduce_mean(-tf.log(self.dis_real+1e-10) - tf.log(1.-self.dis_fake_fresh+1e-10) - tf.log(1.-self.dis_fake_recon+1e-10))
