@@ -4,6 +4,11 @@ from tensorflow.examples.tutorials.mnist import input_data
 import time
 import os
 
+"""
+NOTE: the call to build_encoder in build_vae_l and build_vae_u needs to modified
+depending on whether the encoder/decoder is fully connected or convolutional
+ctrl+F "TOGGLE" to find the line in this file
+"""
 
 
 class SSL_M2():
@@ -285,6 +290,11 @@ class SSL_M2():
 
 
         # Construct the mean and the variance of q(z|x).
+        """
+        === TOGGLE ===
+        NOTE: the call to build_encoder in build_vae_l needs to modified
+        depending on whether the encoder/decoder is fully connected or convolutional
+        """
         # fc
         #self.encoder_log_sigma_sq_l, self.encoder_y_prob_l, h1_l = self.build_encoder1(self.x_l, self.z_dim, self.y_dim, train_phase=self.train_phase_l)
         # conv
@@ -335,9 +345,14 @@ class SSL_M2():
         self.train_phase_u = tf.placeholder(tf.bool, name='train_phase_u')
 
         # Construct the mean and the variance of q(z|x).
-        # fc
+        """
+        === TOGGLE ===
+        NOTE: the call to build_encoder in build_vae_u needs to modified
+        depending on whether the encoder/decoder is fully connected or convolutional
+        """
+        # fc:
         #self.encoder_log_sigma_sq_u, self.encoder_y_prob_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True, train_phase=self.train_phase_u)
-        #conv
+        #conv:
         self.encoder_log_sigma_sq_u, self.encoder_y_prob_u, h1_u = self.build_encoder1(self.x_u, self.z_dim, self.y_dim, reuse=True, train_phase=self.train_phase_u, x_width=self.x_width)
 
 

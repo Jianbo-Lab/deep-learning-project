@@ -5,6 +5,12 @@ import time
 import os
 from misc_ops import *
 
+"""
+NOTE: the call to build_encoder in build_vae needs to modified
+depending on whether the encoder/decoder is fully connected or convolutional
+ctrl+F "TOGGLE" to find the line in this file
+"""
+
 class Conditional_Variational_Autoencoder():
     def __init__(self, sess, build_encoder, build_decoder,
         dataset,
@@ -177,19 +183,6 @@ class Conditional_Variational_Autoencoder():
 
         return batch_images, batch_info
 
-        #if self.dataset == 'mnist':
-            # Extract images and labels (currently useless) from the next batch.
-            #batch_images, batch_labels = self.mnist.train.next_batch(self.batch_size)
-
-
-
-            #if self.condition_on_label:
-                #batch_info = batch_labels
-            #else:
-                #batch_info = self.get_cond_info(batch_images)
-
-            #return batch_images, batch_info
-
     def build_vae(self):
         """
         This function builds up VAE from encoder and decoder function
@@ -207,9 +200,14 @@ class Conditional_Variational_Autoencoder():
 
         # Construct the mean and the variance of q(z|x).
 
-        # fc
+        """
+        === TOGGLE ===
+        NOTE: the call to build_encoder in build_vae needs to modified
+        depending on whether the encoder/decoder is fully connected or convolutional
+        """
+        # fc:
         #self.encoder_mean, self.encoder_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
-        # conv
+        # conv:
         self.encoder_mean, self.encoder_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim)
 
 

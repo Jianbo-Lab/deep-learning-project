@@ -4,7 +4,11 @@ from tensorflow.examples.tutorials.mnist import input_data
 import time
 import os
 
-
+"""
+NOTE: the call to build_encoder and build_discriminator in build_vae needs to modified
+depending on whether the encoder/decoder is fully connected or convolutional
+ctrl+F "TOGGLE" to find the line in this file
+"""
 
 class CVAEGAN():
     def __init__(self, sess, build_encoder, build_decoder, build_discriminator, checkpoint_name = 'vae_checkpoint',
@@ -186,9 +190,14 @@ class CVAEGAN():
             self.eps = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps')
 
             # Construct the mean and the variance of q(z|x).
-            # use this line for fc
+            """
+            === TOGGLE ===
+            NOTE: the call to build_encoder in build_vae needs to modified
+            depending on whether the encoder/decoder is fully connected or convolutional
+            """
+            # use this line for fc:
             self.z_mean, self.z_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
-            # use this line for conv
+            # use this line for conv:
             #self.z_mean, self.z_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim, x_width=self.x_width)
 
 
@@ -209,6 +218,12 @@ class CVAEGAN():
             self.x_fresh = self.build_decoder(tf.concat(1, (self.z_fresh, self.y)), self.x_dim, reuse=True)
 
         with tf.variable_scope('D'):
+
+            """
+            === TOGGLE ===
+            NOTE: if using fully connected, comment out the x_width lines
+            """
+
             # true image
             self.dis_real = self.build_discriminator(self.x,
                 #x_width=self.x_width
