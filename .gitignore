@@ -11,3 +11,6 @@
 *.synctex.gz
 *.log
 *.fls
+*.nav
+*.snm
+*.toc
