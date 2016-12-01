@@ -1,3 +1,5 @@
+### Mistake: did not incorporate y in decoder
+
 import numpy as np
 import tensorflow as tf
 #from ops import *
@@ -200,6 +202,7 @@ class SSL_Decoder:
 
 
         #net = tf.concat(1, (z,y))
+
 
 
         net = z
