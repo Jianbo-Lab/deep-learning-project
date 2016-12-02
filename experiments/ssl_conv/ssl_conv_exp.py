@@ -21,24 +21,32 @@ from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
 from dataset import DataSet
 mnist = read_data_sets('MNIST_data', one_hot=True)
 
-def split_data(dataset, num_labeled):
+def split_data_even(dataset, num_per_label):
     """
     Split dataset into two datasets
     """
     n = dataset.num_examples
-    x, y = dataset.next_batch(n)
-    x1 = x[xrange(num_labeled),:]
-    y1 = y[xrange(num_labeled),:]
-    x2 = x[xrange(num_labeled, n),:]
-    y2 = y[xrange(num_labeled, n),:]
+    x = dataset.images
+    y = dataset.labels
+    idx = []
+    for i in xrange(10):
+        subset = np.random.choice([j for j in xrange(n) if y[j,i]==1], num_per_label, False)
+        idx = np.concatenate((idx, subset))
+    idx = idx.astype(int)
+    idx = np.random.choice(idx, len(idx), False)
+    idx = idx.tolist()
+    comp = list(set(range(n)) - set(idx))
+    x1=x[idx,:]
+    y1=y[idx,:]
+    x2=x[comp,:]
+    y2=y[comp,:]
     d1 = DataSet(x1, y1, dtype=dtypes.float32, reshape=False)
     d2 = DataSet(x2, y2, dtype=dtypes.float32, reshape=False)
     return d1, d2
 
-# Split dataset into labeled and unlabeled
-num_labeled = int(sys.argv[1])
-labeled, unlabeled = split_data(mnist.train, num_labeled)
-_, y = labeled.next_batch(num_labeled)
+labeled, unlabeled = split_data_even(mnist.train,100)
+print labeled.num_examples, unlabeled.num_examples
+y = labeled.labels
 print np.sum(y, axis=0)
 
 print 'Loaded data'
