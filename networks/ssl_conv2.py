@@ -46,12 +46,7 @@ class SSL_Encoder1:
         h1 = net
         #net = tf.concat(1, (net,y))
         #z_mean = slim.fully_connected(net, z_dim, scope='z_mean', activation_fn=None)
-        z_log_sigma_sq = slim.fully_connected(net, z_dim, scope='z_log_sigma', activation_fn=None, reuse=reuse,
-            normalizer_fn=slim.batch_norm,
-            normalizer_params={'reuse':reuse,'is_training':train_phase,
-                'scale':True,
-                'updates_collections':None,
-                'scope':'z_lgo_sigm_sq_bn'})
+        z_log_sigma_sq = slim.fully_connected(net, z_dim, scope='z_log_sigma', activation_fn=None, reuse=reuse)
 
         y_prob = slim.fully_connected(h1, y_dim, scope='y_prob',
             activation_fn=tf.nn.softmax, reuse=reuse,
@@ -100,12 +95,7 @@ class SSL_Encoder2:
             #scale=True, updates_collections=None
             #)
 
-        z_mu = slim.fully_connected(h2, z_dim, scope='z_mu', reuse=reuse, activation_fn=None,
-            normalizer_fn=slim.batch_norm,
-            normalizer_params={'reuse':reuse,'is_training':train_phase,
-                'scale':True,
-                'updates_collections':None,
-                'scope':'z_mu_bn'})
+        z_mu = slim.fully_connected(h2, z_dim, scope='z_mu', reuse=reuse, activation_fn=None)
 
         """
         h2 = tf.nn.softplus(batch_norm_layer(

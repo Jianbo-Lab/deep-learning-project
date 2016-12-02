@@ -1,5 +1,3 @@
-### Mistake: did not incorporate y in decoder
-
 import numpy as np
 import tensorflow as tf
 #from ops import *
@@ -240,6 +238,7 @@ class SSL_Decoder:
                 'updates_collections':None,
                 'scope':'dec_conv_bn1'})
         net = tf.reshape(net, [batch_size, -1])
+        net = tf.concat(1, (net, y))
         net = slim.fully_connected(net, 512, reuse=reuse, scope='dec_fc2',
             normalizer_fn=slim.batch_norm,
             normalizer_params={'reuse':reuse,
