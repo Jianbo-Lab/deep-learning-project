@@ -44,7 +44,7 @@ def split_data_even(dataset, num_per_label):
     d2 = DataSet(x2, y2, dtype=dtypes.float32, reshape=False)
     return d1, d2
 
-labeled, unlabeled = split_data_even(mnist.train,100)
+labeled, unlabeled = split_data_even(mnist.train,int(sys.argv[1]))
 print labeled.num_examples, unlabeled.num_examples
 y = labeled.labels
 print np.sum(y, axis=0)
@@ -77,6 +77,34 @@ else:
     )
 
 model.train()
+
+
+# Classify validation images
+batch_size = 100
+num_val = mnist.validation.num_examples
+tot = 0
+for t in xrange(num_val / batch_size):
+    x_val, y_val = mnist.validation.next_batch(batch_size)
+    y_pred = model.classify(x_val)
+    y_val = np.argmax(y_val, axis=1)
+    tot += np.sum(y_pred != y_val)
+print "Error: {}".format(float(tot)/num_val)
+#with open("SSL_errors/SSL_err_1000_conv.txt", "w") as text_file:
+    #text_file.write("Validation error: {}\n".format(float(tot)/num_val))
+
+
+# Classify test images
+batch_size = 100
+num_test = mnist.test.num_examples
+tot = 0
+for t in xrange(num_test / batch_size):
+    x_test, y_test = mnist.test.next_batch(batch_size)
+    y_pred = model.classify(x_test)
+    y_test = np.argmax(y_test, axis=1)
+    tot += np.sum(y_pred != y_test)
+print "Error: {}".format(float(tot)/num_test)
+#with open("SSL_errors/SSL_err_1000_conv.txt", "a") as text_file:
+    #text_file.write("Test error: {}".format(float(tot)/num_test))
 
 
 
