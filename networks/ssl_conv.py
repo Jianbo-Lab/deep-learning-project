@@ -238,7 +238,7 @@ class SSL_Decoder:
                 'updates_collections':None,
                 'scope':'dec_conv_bn1'})
         net = tf.reshape(net, [batch_size, -1])
-        net = tf.concat(1, (net, y))
+        net = tf.concat(1, (net, y)) # this line was accidentally commented out
         net = slim.fully_connected(net, 512, reuse=reuse, scope='dec_fc2',
             normalizer_fn=slim.batch_norm,
             normalizer_params={'reuse':reuse,
@@ -246,6 +246,14 @@ class SSL_Decoder:
                 'scale':True,
                 'updates_collections':None,
                 'scope':'dec_fc_bn2'})
+
+        net = slim.fully_connected(net, 512, reuse=reuse, scope='dec_fc3',
+            normalizer_fn=slim.batch_norm,
+            normalizer_params={'reuse':reuse,
+                'is_training':train_phase,
+                'scale':True,
+                'updates_collections':None,
+                'scope':'dec_fc_bn3'})
 
 
         """
