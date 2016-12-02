@@ -55,22 +55,22 @@ tf.reset_default_graph()
 
 # Train
 sess = tf.InteractiveSession()
-build_encoder1 = SSL_Encoder1()
-build_encoder2 = SSL_Encoder2()
-build_decoder = SSL_Decoder()
+build_encoder1 = SSL_Encoder1(1024)
+build_encoder2 = SSL_Encoder2(1024)
+build_decoder = SSL_Decoder(1024)
 
 print 'Started training'
 
 
 if len(sys.argv) == 2:
     model = SSL_M2(sess, build_encoder1, build_encoder2, build_decoder, labeled, unlabeled,
-            batch_size = 100, z_dim = 50, x_dim = 784, y_dim=10, alpha=55000./10,
+            batch_size = 100, z_dim = 100, x_dim = 784, y_dim=10, alpha=55000./10,
            learning_rate = 5e-4, num_epochs = 10, load=False, lr_decay=0.99, lr_decay_freq=1000,
           checkpoint_name='ssl_conv_checkpoint', checkpoint_dir = './'
     )
 else:
     model = SSL_M2(sess, build_encoder1, build_encoder2, build_decoder, labeled, unlabeled,
-            batch_size = 100, z_dim = 50, x_dim = 784, y_dim=10, alpha=55000./10,
+            batch_size = 100, z_dim = 100, x_dim = 784, y_dim=10, alpha=55000./10,
            learning_rate = 5e-4, num_epochs = 10, load=True, lr_decay=0.99, lr_decay_freq=1000,
                load_file = sys.argv[2],
                checkpoint_name='ssl_conv_checkpoint_loaded', checkpoint_dir = './'
