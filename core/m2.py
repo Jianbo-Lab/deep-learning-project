@@ -236,11 +236,11 @@ class SSL_M2():
             self.num_epoch += 1
             epoch_end = time.time()
             print 'Epoch {} loss: {} (time: {} s)'.format(self.num_epoch, avg_loss_value, epoch_end-epoch_start)
-            self.save(self.num_epoch)
+            #self.save(self.num_epoch)
         end_time = time.time()
         print '{} min'.format((end_time-start_time)/60.)
         #self.summary_writer.close()
-        #self.save(epoch)
+        self.save(epoch)
 
     def save(self,epoch):
         self.saver = tf.train.Saver()
