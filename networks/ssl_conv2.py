@@ -186,7 +186,13 @@ class SSL_Decoder:
                 'scale':True,
                 'updates_collections':None,
                 'scope':'dec_bn3'})
-        x_mean = slim.fully_connected(net, x_dim, scope='x_mean', reuse=reuse, activation_fn=tf.nn.sigmoid)
+        x_mean = slim.fully_connected(net, x_dim, scope='x_mean', reuse=reuse, activation_fn=tf.nn.sigmoid,
+            normalizer_fn=slim.batch_norm,
+            normalizer_params={'reuse':reuse,
+                'is_training':train_phase,
+                'scale':True,
+                'updates_collections':None,
+                'scope':'dec_bn4'})
         #x_mean = slim.conv2d_transpose(net, 1, [1,1], stride=1, reuse=reuse, scope='x_mean', activation_fn=tf.nn.sigmoid)
         #x_mean = tf.reshape(x_mean,[batch_size,-1])
 
