@@ -1,0 +1,324 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% baposter Landscape Poster
+% LaTeX Template
+% Version 1.0 (11/06/13)
+%
+% baposter Class Created by:
+% Brian Amberg (baposter@brian-amberg.de)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[portrait,fontscale=0.40,paperwidth=30in, paperheight=40in,margin=1in]{baposter} % Adjust the font scale/size here
+% 0.285
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+%\usepackage{tgschola} % or any other font package you like
+\usepackage{setspace}
+\usepackage{mathrsfs}
+\usepackage{epsfig}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsbsy}
+\usepackage{bm}
+\usepackage{grffile}
+\usepackage{graphicx}
+\usepackage{relsize}
+\usepackage{amssymb}
+\usepackage{relsize}
+\usepackage[font=scriptsize]{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{epstopdf}
+
+\usepackage{amsmath, amsthm, amssymb, mathtools, thmtools, mathdots, tikz, pgfplots}
+\mathtoolsset{showonlyrefs}
+
+
+
+\newcommand{\eat}[1]{}
+
+
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+ \usepackage{amsthm}
+\newtheorem{theorem}{Theorem}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+%\newcommand{\m}[1]{\mathcal{#1}}
+%\renewcommand{\b}[1]{\mathbb{#1}}
+\DeclarePairedDelimiter{\parens}{(}{)}
+\DeclarePairedDelimiter{\braces}{\{}{\}}
+\DeclarePairedDelimiter{\brackets}{[}{]}
+\DeclarePairedDelimiter{\abs}{|}{|}
+\DeclarePairedDelimiter{\norm}{\|}{\|}
+\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\newcommand{\indep}{\mathop{\rotatebox[origin=c]{90}{$\models$}}}
+%\newcommand{\notindep}{\mathop{\rotatebox[origin=c]{90}{$\models$}}}
+%\DeclareMathOperator{\im}{im}
+%\DeclareMathOperator{\Aut}{Aut}
+%\DeclareMathOperator{\Inn}{Inn}
+%\DeclareMathOperator{\lcm}{lcm}
+%\DeclareMathOperator{\trace}{trace}
+%\DeclareMathOperator{\Hom}{Hom}
+%\DeclareMathOperator{\red}{red}
+\newcommand{\op}[1]{\operatorname{#1}}
+\renewcommand{\b}[1]{\boldsymbol{\mathbf{#1}}}
+\renewcommand{\bar}[1]{\overline{#1}}
+\renewcommand{\hat}[1]{\widehat{#1}}
+\renewcommand{\tilde}[1]{\widetilde{#1}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\Var}{\op{Var}}
+\newcommand{\Cov}{\op{Cov}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+
+
+
+\usepackage{graphicx} % Required for including images
+%\graphicspath{{figures/}} % Directory in which figures are stored
+
+\usepackage{amsmath} % For typesetting math
+\usepackage{amssymb} % Adds new symbols to be used in math mode
+
+\usepackage{booktabs} % Top and bottom rules for tables
+\usepackage{enumitem} % Used to reduce itemize/enumerate spacing
+\usepackage{palatino} % Use the Palatino font
+\usepackage[font=small,labelfont=bf]{caption} % Required for specifying captions to tables and figures
+
+\usepackage{multicol} % Required for multiple columns
+\setlength{\columnsep}{1.0em} % Slightly increase the space between columns
+\setlength{\columnseprule}{0mm} % No horizontal rule between columns
+
+\usepackage{tikz} % Required for flow chart
+\usetikzlibrary{shapes,arrows} % Tikz libraries required for the flow chart in the template
+
+\newcommand{\compresslist}{ % Define a command to reduce spacing within itemize/enumerate environments, this is used right after \begin{itemize} or \begin{enumerate}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+}
+
+\definecolor{lightblue}{rgb}{0.145,0.6666,1} % Defines the color used for content box headers
+
+\begin{document}
+
+\begin{poster}
+{
+headerborder=closed, % Adds a border around the header of content boxes
+colspacing=1em, % Column spacing
+bgColorOne=white, % Background color for the gradient on the left side of the poster
+bgColorTwo=white, % Background color for the gradient on the right side of the poster
+borderColor=lightblue, % Border color
+headerColorOne=black, % Background color for the header in the content boxes (left side)
+headerColorTwo=lightblue, % Background color for the header in the content boxes (right side)
+headerFontColor=white, % Text color for the header text in the content boxes
+boxColorOne=white, % Background color of the content boxes
+textborder=roundedleft, % Format of the border around content boxes, can be: none, bars, coils, triangles, rectangle, rounded, roundedsmall, roundedright or faded
+eyecatcher=true, % Set to false for ignoring the left logo in the title and move the title left
+headerheight=0.1\textheight, % Height of the header
+headershape=roundedright, % Specify the rounded corner in the content box headers, can be: rectangle, small-rounded, roundedright, roundedleft or rounded
+headerfont=\large\bf\textsc, % Large, bold and sans serif font in the headers of content boxes
+%textfont={\setlength{\parindent}{1.5em}}, % Uncomment for paragraph indentation
+linewidth=2pt % Width of the border lines around content boxes
+}
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+%
+{
+%\includegraphics[height=4em]{images/berkeley.png}
+} % First university/lab logo on the left
+{
+\bf
+\textsc{Variational Auto-encoders...?}
+\vspace{0.5em}
+} % Poster title
+{\textsc{Jianbo Chen, Billy Fang, Cheng Ju
+\hspace{12pt}
+\textit{Departments of Statistics and Biostatistics, UC Berkeley}
+\hspace{12pt} CS 294-129, Fall 2016
+%\vspace{-2em}
+}} % Author names and institution
+
+
+%----------------------------------------------------------------------------------------
+%	OBJECTIVES
+%----------------------------------------------------------------------------------------
+
+\headerbox{Background}{name=Background,column=0,row=0}{
+\begin{itemize}\compresslist
+    \item Variational auto-encoders are useful for generating new examples from observed data
+    \item Learns latent encoding of data
+    \item Can be used for semi-supervised learning
+\end{itemize}
+%\vspace{0.3em} % When there are two boxes, some whitespace may need to be added if the one on the right has more content
+}
+
+%----------------------------------------------------------------------------------------
+%	INTRODUCTION
+%----------------------------------------------------------------------------------------
+\headerbox{VAE}{name=VAE,column=0,below=Background}{
+\begin{minipage}[b]{0.9\textwidth}
+\center
+\includegraphics[width=0.45\textwidth]{images/graphical_model.png}
+\includegraphics[width=0.45\textwidth]{images/vae.png}
+\end{minipage}
+\begin{equation}
+\log p(x)
+\ge \E_{z \sim Q(\cdot \mid x)}[\log p(x \mid z)]
+- \op{KL}(Q(z \mid x) \| p(z)).
+\end{equation}
+
+}
+
+\headerbox{CVAE}{name=CVAE,column=0,below=VAE}{
+\begin{minipage}[b]{0.9\textwidth}
+\center
+\includegraphics[width=\textwidth]{images/cvae.png}
+\end{minipage}
+\begin{scriptsize}
+\begin{equation}
+\log p(x \mid y)
+\ge \E_{z \sim Q(\cdot \mid y,x)}[\log p(x \mid y,z)]
+- \op{KL}(Q(z \mid x,y) \| p(z \mid y)).
+\end{equation}
+\end{scriptsize}
+}
+
+
+\headerbox{CVAE for completion}{name=completion,column=0,below=CVAE}{ % This block's bottom aligns with the bottom of the conclusion block
+\begin{minipage}[b]{0.9\textwidth}
+\center
+\includegraphics[width=0.6\textwidth]{images/svhn_left_half.png}
+%\includegraphics[width=0.6\textwidth]{images/svhn_cvae_fc_style.png}
+\end{minipage}
+}
+
+\headerbox{CVAE for style transfer}{name=style,column=0,below=completion}{ % This block's bottom aligns with the bottom of the conclusion block
+\begin{minipage}[b]{0.9\textwidth}
+\center
+%\includegraphics[width=0.6\textwidth]{images/svhn_left_half.png}
+\includegraphics[width=0.6\textwidth]{images/svhn_cvae_fc_style.png}
+\end{minipage}
+}
+
+
+
+\headerbox{Semi-supervised learning}{name=ssl,column=1}{
+\begin{itemize}\compresslist
+    \item Handle datasets with missing labels
+    \item Models label distribution
+    \item Labeled and unlabeled examples enter loss differently
+\end{itemize}
+\begin{align}
+\log p(x,y)
+&\ge \E_{z \sim Q(z \mid x,y)}[\log p(x \mid y,z) + \log p(y)]\\
+&\qquad - \op{KL}(Q(z \mid x,y) \| p(z)) =: - \mathcal{L}(x,y)\\
+\log p(x) &\ge \sum_y q(y \mid x) (-\mathcal{L}(x,y)) + H(q(y \mid x))
+\end{align}
+
+\begin{center}
+Validation/test error on MNIST
+
+\begin{tabular}{c|r|r}
+& 1000 labeled & 600 labeled\\ \hline
+Fully connected & 4.7\%/ 5.1\% & 11.5\%/12.0\%\\
+Convolutional & 4.2\%/4.8\% & 6.0\%/6.2\%\\
+Kingma et al. \cite{kingma2014semi}
+& 2.4\% & 2.6\%
+\end{tabular}
+\end{center}
+}
+
+
+
+\headerbox{Adding GANs}{name=gan,column=1,below=ssl}{ % This block is as tall as the references
+\begin{itemize}\compresslist
+    \item VAE output is often blurry
+    \item Add discriminator to encourage sharpness
+\end{itemize}
+
+\begin{minipage}[b]{0.9\textwidth}
+\includegraphics[width=\textwidth]{images/vaegan.png}
+\end{minipage}
+
+Replace decoder loss with comparison of discriminator layers
+
+\begin{minipage}[b]{0.9\textwidth}
+\includegraphics[width=\textwidth]{images/vaegan2.png}
+\end{minipage}
+}
+
+
+\headerbox{CVAEGAN}{name=cvaegan,column=1,below=gan}{
+CVAEGAN results here
+}
+
+
+
+
+
+
+\headerbox{Deep feature loss}{name=deep_feature,row=0,column = 2}{
+a
+}
+
+
+
+\headerbox{Future Directions}{name=future,column=2,span=1,below = deep_feature}{ % This block is as tall as the references block
+a
+%\vspace{0.3em}
+ }
+
+
+\renewcommand{\section}[2]{}% removes extraneous ``References'' section title
+\headerbox{References}{name=reference,column=2,span=1,above = bottom}{ % This block is as tall as the references block
+\bibliographystyle{plain}
+\bibliography{../final_report/cs294_bib}
+\nocite{kingma2013auto,doersch2016tutorial,larsen2015autoencoding,hou2016deep}
+}
+
+
+%----------------------------------------------------------------------------------------
+%	CONTACT INFORMATION
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	CONCLUSION
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+%	MATERIALS AND METHODS
+%----------------------------------------------------------------------------------------
+----------------------------------------------------------------
+%	RESUL
+%----------------------------------------------------------------------------------------
+
+\end{poster}
+
+\end{document}

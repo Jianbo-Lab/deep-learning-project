@@ -8,7 +8,7 @@ import os
 
 class Variational_Autoencoder():
     def __init__(self, sess, build_encoder, build_decoder, checkpoint_name = 'vae_checkpoint',
-        batch_size = 100, z_dim = 20, img_dim = 784, dataset = 'mnist',
+        batch_size = 100, z_dim = 20, x_dim = 784, dataset = 'mnist',
         learning_rate = 0.001, lr_decay=0.95, lr_decay_freq=1000, num_epochs = 5,load = False,load_file = None,
         checkpoint_dir = '../notebook/checkpoints/'):
         """
@@ -21,7 +21,7 @@ class Variational_Autoencoder():
         checkpoint_name: The name of the checkpoint file to be saved.
         batch_size: The number of samples in each batch.
         z_dim: the dimension of z.
-        img_dim: the dimension of an image.
+        x_dim: the dimension of an image.
         (Currently, we only consider 28*28 = 784.)
         dataset: The filename of the dataset.
         (Currently we only consider mnist.)
@@ -34,7 +34,7 @@ class Variational_Autoencoder():
         self.build_decoder = build_decoder
         self.checkpoint_name = checkpoint_name
         self.z_dim = z_dim
-        self.img_dim = img_dim
+        self.x_dim = x_dim
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.dataset = dataset
@@ -149,7 +149,7 @@ class Variational_Autoencoder():
         in the global environment.
         """
         # Add a placeholder for one batch of images
-        self.images = tf.placeholder(tf.float32,[self.batch_size,self.img_dim],
+        self.images = tf.placeholder(tf.float32,[self.batch_size,self.x_dim],
                                     name = 'images')
 
         # Create a placeholder for eps.
@@ -161,7 +161,7 @@ class Variational_Autoencoder():
         self.batch_z = tf.add(self.encoder_mean, \
                         tf.mul(tf.sqrt(tf.exp(self.encoder_log_sigma2)), self.batch_eps))
         # Construct the mean of the Bernoulli distribution p(x|z).
-        self.decoder_mean = self.build_decoder(self.batch_z,self.img_dim)
+        self.decoder_mean = self.build_decoder(self.batch_z,self.x_dim)
         # Compute the loss from decoder (empirically).
         self.decoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) \
                            + (1 - self.images) * tf.log(1e-10 + 1 - self.decoder_mean),

@@ -29,7 +29,7 @@ build_encoder = Encoder(512)
 build_decoder = Decoder(512)
 build_discriminator = Discriminator(1024)
 
-# as the number of labeled examples decreases, need alpha to decrease as well?
+
 if len(sys.argv) == 1:
     model = VAEGAN(sess, build_encoder, build_decoder, build_discriminator, dataset=mnist.train,
             batch_size = 100, z_dim = 50, x_dim = 784,

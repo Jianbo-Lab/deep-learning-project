@@ -29,7 +29,7 @@ class Encoder:
         net = slim.conv2d(net, 50, [5,5], stride=1)
         net = slim.max_pool2d(net, [2,2], stride=2)
         net = tf.reshape(net, [batch_size, -1])
-        net = tf.concat(1, (x,y))
+        net = tf.concat(1, (net,y))
         net = slim.fully_connected(net, 500)
 
 

@@ -4,12 +4,16 @@ from tensorflow.examples.tutorials.mnist import input_data
 import time
 import os
 
-
+"""
+NOTE: the call to build_encoder and build_discriminator in build_vae needs to modified
+depending on whether the encoder/decoder is fully connected or convolutional
+ctrl+F "TOGGLE" to find the line in this file
+"""
 
 class CVAEGAN():
     def __init__(self, sess, build_encoder, build_decoder, build_discriminator, checkpoint_name = 'vae_checkpoint',
         batch_size = 100, z_dim = 20, x_dim = 784, dataset = 'mnist', cond_info_dim=10,
-        learning_rate = 0.001, lr_decay=0.95, lr_decay_freq=1000, num_epochs = 5,load = False,load_file = None, gamma=1.,
+        learning_rate = 0.001, lr_decay=0.95, lr_decay_freq=1000, num_epochs = 5,load = False,load_file = None, gamma=1., x_width=28,
         checkpoint_dir = '../notebook/checkpoints/'):
         """
         Inputs:
@@ -47,6 +51,7 @@ class CVAEGAN():
         self.lr_decay_freq=lr_decay_freq
         self.cond_info_dim = cond_info_dim
         self.gamma = gamma # down-weight GAN loss
+        self.x_width=x_width
         # if dataset == 'mnist':
         #     # Load MNIST data in a format suited for tensorflow.
         #     self.mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
@@ -116,13 +121,15 @@ class CVAEGAN():
                                                         self.y: batch_info,
                                                         self.eps: batch_eps,
                                                         self.z_fresh: batch_eps2,
-                                                        self.lr: self.learning_rate})
+                                                        self.lr: self.learning_rate,
+                                                        self.train_phase: True})
                 _, dis_loss = self.sess.run([self.dis_opt, self.dis_loss],
                                             feed_dict = {self.x: batch_images,
                                                         #self.eps: batch_eps,
                                                         self.x_fresh: x_fresh,
                                                         self.x_mean: x_mean,
-                                                        self.lr: self.learning_rate})
+                                                        self.lr: self.learning_rate,
+                                                        self.train_phase: True})
                 loss_value = vae_loss + dis_loss
 
                 duration = time.time() - start_time
@@ -171,6 +178,7 @@ class CVAEGAN():
         This function builds up VAE from encoder and decoder function
         in the global environment.
         """
+        self.train_phase = tf.placeholder(tf.bool, name='train_phase')
         # Add a placeholder for one batch of images
         with tf.variable_scope('G'):
             self.x = tf.placeholder(tf.float32,[self.batch_size,self.x_dim],
@@ -182,10 +190,15 @@ class CVAEGAN():
             self.eps = tf.placeholder(tf.float32,[self.batch_size, self.z_dim], name = 'eps')
 
             # Construct the mean and the variance of q(z|x).
-            # use this line for fc
-            self.z_mean, self.z_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
-            # use this line for conv
-            #self.z_mean, self.z_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim)
+            """
+            === TOGGLE ===
+            NOTE: the call to build_encoder in build_vae needs to modified
+            depending on whether the encoder/decoder is fully connected or convolutional
+            """
+            # use this line for fc:
+            #self.z_mean, self.z_log_sigma2 = self.build_encoder(tf.concat(1, (self.x, self.y)), self.z_dim)
+            # use this line for conv:
+            self.z_mean, self.z_log_sigma2 = self.build_encoder(self.x, self.y, self.z_dim, x_width=self.x_width)
 
 
             # Compute z from eps and z_mean, z_sigma2.
@@ -205,12 +218,26 @@ class CVAEGAN():
             self.x_fresh = self.build_decoder(tf.concat(1, (self.z_fresh, self.y)), self.x_dim, reuse=True)
 
         with tf.variable_scope('D'):
+
+            """
+            === TOGGLE ===
+            NOTE: if using fully connected, comment out the x_width lines
+            """
+
             # true image
-            self.dis_real = self.build_discriminator(self.x)
+            self.dis_real = self.build_discriminator(self.x,
+                x_width=self.x_width
+                )
+
             # reconstruction
-            self.dis_fake_recon = self.build_discriminator(self.x_mean, reuse=True)
+            self.dis_fake_recon = self.build_discriminator(self.x_mean, reuse=True,
+                x_width=self.x_width
+                )
+
             # fresh generation
-            self.dis_fake_fresh = self.build_discriminator(self.x_fresh, reuse=True)
+            self.dis_fake_fresh = self.build_discriminator(self.x_fresh, reuse=True,
+                x_width=self.x_width
+            )
 
         dis_loss = tf.reduce_mean(-tf.log(self.dis_real+1e-10) - tf.log(1.-self.dis_fake_fresh+1e-10) - tf.log(1.-self.dis_fake_recon+1e-10))
 
@@ -235,7 +262,7 @@ class CVAEGAN():
         sampled_z = np.random.randn(self.batch_size,self.z_dim)
 
         return self.sess.run(self.x_mean,\
-                      feed_dict = {self.z:sampled_z, self.y:info})
+                      feed_dict = {self.z:sampled_z, self.y:info, self.train_phase: False})
 
     def get_code(self, img):
         return self.sess.run(self.z_mean, feed_dict={self.x:img})

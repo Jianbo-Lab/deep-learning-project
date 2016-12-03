@@ -50,6 +50,16 @@ def get_left_half(x, sample=True):
     out = np.random.binomial(1, subset)
     return(out)
 
+def get_left_half_depth(x, depth=3):
+    if (len(x.shape)== 1):
+        x = x.reshape(1, len(x))
+    n = x.shape[0]
+    width = int(np.sqrt(x.shape[1]/depth))
+    subset = x.reshape(n, width, width, depth)
+    subset = subset[:, :, xrange(width/2), :]
+    subset = subset.reshape(n, width*width*depth/2)
+    return(subset)
+
 def gray_to_rgb(img):
     """
     Converts 28 x 28 array to 3 x 64 x 64 RGB
