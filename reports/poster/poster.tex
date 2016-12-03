@@ -226,13 +226,11 @@ linewidth=2pt % Width of the border lines around content boxes
 \includegraphics[width=0.48\textwidth]{images/left_half.png}
 \includegraphics[width=0.48\textwidth]{images/svhn_left_half.png}
 \centering
-%\includegraphics[width=0.6\textwidth]{images/svhn_cvae_fc_style.png}
 \end{minipage}
 }
 
 \headerbox{CVAE for style transfer}{name=style,column=0,below=completion}{ % This block's bottom aligns with the bottom of the conclusion block
 \begin{minipage}[b]{\textwidth}
-%\includegraphics[width=0.6\textwidth]{images/svhn_left_half.png}
 \includegraphics[width=0.48\textwidth]{images/style.png}
 \includegraphics[width=0.48\textwidth]{images/svhn_cvae_fc_style.png}
 \centering
@@ -338,7 +336,7 @@ a
 \renewcommand{\section}[2]{}% removes extraneous ``References'' section title
 \headerbox{References}{name=reference,column=2,span=1,above = bottom}{ % This block is as tall as the references block
 \bibliographystyle{plain}
-\bibliography{../final_report/cs294_bib}
+\bibliography{cs294_bib}
 \nocite{kingma2013auto,kingma2014semi,gregor2015draw,larsen2015autoencoding,doersch2016tutorial}
 }
 
