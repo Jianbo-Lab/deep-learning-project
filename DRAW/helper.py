@@ -5,8 +5,10 @@ def linear(x, output_dim):
     affine transformation Wx+b
     assumes x.shape = (batch_size, num_features)
     """
+    
     w = tf.get_variable("w", [x.get_shape()[1], output_dim]) 
     b = tf.get_variable("b", [output_dim], initializer = tf.constant_initializer(0.0))
+    # print '!!!!!!!!!!!!!!!', w.get_shape(), b.get_shape()
     return tf.matmul(x,w)+b
 
 
@@ -72,11 +74,11 @@ def sampleQ(h_enc, reuse, batch_size, z_size):
     """
     e = tf.random_normal([batch_size, z_size])
 
-    with tf.variable_scope("mu",reuse = reuse):
-        mu=linear(h_enc, z_size)
-    with tf.variable_scope("sigma",reuse = reuse):
-        logsigma=linear(h_enc, z_size)
-        sigma=tf.exp(logsigma)
+    with tf.variable_scope("mu", reuse = reuse):
+        mu = linear(h_enc, z_size)
+    with tf.variable_scope("sigma", reuse = reuse):
+        logsigma = linear(h_enc, z_size)
+        sigma = tf.exp(logsigma)
     return (mu + sigma*e, mu, logsigma, sigma)
             
 

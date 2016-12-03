@@ -3,6 +3,9 @@
 
 # In[185]:
 
+from __future__ import division, print_function, absolute_import
+import numpy as np
+
 import sys
 sys.path.append('../core/')
 sys.path.append('../networks/')
@@ -11,65 +14,38 @@ from networks import *
 
 import numpy as np
 import tensorflow as tf
-
-import matplotlib.pyplot as plt
+import argparse
 
 # for auto-reloading external modules
 # see http://stackoverflow.com/questions/1907993/autoreload-of-modules-in-ipython
 
 
+def main():
 
-# In[186]:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('enc_size',type = int)
+    parser.add_argument('dec_size',type = int) 
+    parser.add_argument('learning_rate',type = float) 
+    parser.add_argument('train_itrs',type = int)
+    args = parser.parse_args()
+    lr = args.learning_rate
+    train_itrs = args.train_itrs
+    enc_size = args.enc_size
+    dec_size = args.dec_size
 
-tf.reset_default_graph()
-
-
-# In[187]:
-
-sess = tf.InteractiveSession()
-build_encoder = Encoder(256)
-build_decoder = Decoder(256)
-train_iters = 2
-print_iters = 100
-
-
-# In[188]:
-
-model =  DRAW(sess, build_encoder, build_decoder, read_attn = True, write_attn = True)
-
-
-# In[190]:
-
-model.train(train_itrs = train_iters, learning_rate = 1e-4)
+    tf.reset_default_graph()
+    
+    sess = tf.InteractiveSession()
+    build_encoder = Encoder(enc_size)
+    build_decoder = Decoder(dec_size)
+    print_itrs = 500
 
 
-# In[191]:
+    model =  DRAW(sess, build_encoder, build_decoder, read_attn = True, write_attn = True, T = 10, batch_size = 256, enc_size = enc_size, dec_size = dec_size)
 
-plt.plot(range(train_iters), model.Lxs, range(train_iters), model.Lzs)
-
-
-# In[192]:
-
-generated_images = model.generate()
+    model.train(train_itrs = train_itrs, learning_rate = lr, print_itrs = print_itrs)
 
 
-# In[193]:
-
-generated_images.shape
-
-
-# In[194]:
-
-T = 10
-num_examples = 5
-
-plt.figure(figsize=(20,20))
-for t in xrange(T):
-    for n in xrange(num_examples):
-        plt.subplot(num_examples, T, T* n + t + 1)
-        plt.imshow(generated_images[t,n, ].reshape(28, 28), cmap='gray_r')
-        plt.xticks([])
-        plt.yticks([])
-plt.tight_layout()
-plt.show()
+if __name__ == '__main__':
+    main()
 
