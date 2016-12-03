@@ -182,23 +182,23 @@ linewidth=2pt % Width of the border lines around content boxes
 %----------------------------------------------------------------------------------------
 %	INTRODUCTION
 %----------------------------------------------------------------------------------------
-\headerbox{Variational auto-encoder (VAE)}{name=VAE,column=0,below=Background}{
+
+\headerbox{Variational auto-encoder}{name=VAE,column=0,below=Background}{
 \begin{itemize}\compresslist
     \item latent variable model: $z \sim \mathcal{N}(0,I)$, $x \mid z \sim f(x;z,\theta)$ (e.g. Bernoulli)
     \item variational inference: maximize lower bound on log likelihood
 \end{itemize}
-\begin{minipage}[b]{\textwidth}
-\center
+%\begin{minipage}[b]{\textwidth}
+%\center
 %\includegraphics[width=0.45\textwidth]{images/graphical_model.png}
-\includegraphics[width=0.9\textwidth]{images/vae2.png}
-\centering
-\end{minipage}
+%\includegraphics[width=0.9\textwidth]{images/vae2.png}
+%\centering
+%\end{minipage}
 \begin{equation}
 \log p(x)
 \ge \E_{z \sim Q(\cdot \mid x)}[\log p(x \mid z)]
 - \op{KL}(Q(z \mid x) \| p(z)).
 \end{equation}
-
 }
 
 \headerbox{Conditional VAE (CVAE)}{name=CVAE,column=0,below=VAE}{
@@ -207,7 +207,7 @@ linewidth=2pt % Width of the border lines around content boxes
 \end{itemize}
 \begin{minipage}[b]{\textwidth}
 \center
-\includegraphics[width=0.9\textwidth]{images/cvae.png}
+\includegraphics[width=0.9\textwidth]{images/cvae_simple.png}
 \centering
 \end{minipage}
 \begin{scriptsize}
@@ -274,11 +274,8 @@ Kingma et al. \cite{kingma2014semi}
 \item RNN structure
 \end{itemize}
 \begin{minipage}[b]{\textwidth}
-
-\includegraphics[width=0.9\textwidth]{images/draw_model.png}
-\centering
-
-\includegraphics[width=0.8\textwidth]{images/cdraw.png}
+\includegraphics[width=0.6\textwidth]{images/draw_model.png}
+\includegraphics[width=0.38\textwidth]{images/cdraw.png}
 \centering
 \end{minipage}
 }
@@ -289,14 +286,14 @@ Kingma et al. \cite{kingma2014semi}
 \begin{itemize}\compresslist
     \item VAE output is often blurry
     \item Add discriminator to encourage sharpness
+    \item Replace decoder loss with comparison of discriminator layers
 \end{itemize}
 
-\begin{minipage}[b]{\textwidth}
-\includegraphics[width=0.8\textwidth]{images/vaegan.png}
-\centering
-\end{minipage}
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.8\textwidth]{images/vaegan.png}
+%\centering
+%\end{minipage}
 
-Replace decoder loss with comparison of discriminator layers
 
 \begin{minipage}[b]{\textwidth}
 \includegraphics[width=0.8\textwidth]{images/vaegan2.png}
