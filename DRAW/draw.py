@@ -9,12 +9,12 @@ from helper import *
 
 class DRAW():
 
-    def __init__(self, sess, build_encoder, build_decoder, read_attn = False, write_attn = False, T = 10, dec_size = 256, enc_size = 256):
+    def __init__(self, sess, build_encoder, build_decoder, read_attn = False, write_attn = False, T = 10, dec_size = 128, enc_size = 128, batch_size = 256):
         self.sess = sess
 
         self.build_encoder = build_encoder
         self.build_decoder = build_decoder
-
+        self.batch_size  = batch_size
     
         self.dec_size = dec_size
         self.enc_size = enc_size
@@ -44,9 +44,9 @@ class DRAW():
         ## BUILD MODEL ## 
     
 
-    def train(self, train_itrs = 1000, batch_size = 100, print_itrs = 1000, learning_rate = 1e-4, load = False):
+    def train(self, train_itrs = 1000, print_itrs = 1000, learning_rate = 1e-4, load_file = None):
 
-        self.batch_size = batch_size # training minibatch size
+        # self.batch_size = batch_size # training minibatch size
         self.train_itrs = train_itrs
         self.print_itrs = print_itrs
         self.learning_rate= learning_rate # learning rate for optimizer
@@ -90,25 +90,27 @@ class DRAW():
         self.saver = tf.train.Saver() # saves variables learned during training
         tf.initialize_all_variables().run()
 
-        if load:
-            self.saver.restore(sess, "draw.ckpt") # to restore from model, uncomment this line
-        
-        for i in range(self.train_itrs):
+        if load_file is not None:
+            self.saver.restore(sess, load_file) # to restore from model, uncomment this line
+        else:
 
-            # batch_eps = np.random.randn(self.T, self.batch_size, self.z_size)
-	    xtrain,_ = train_data.next_batch(self.batch_size) # xtrain is (batch_size x img_size)
+            print(self.batch_size * self.train_itrs / 60000 )
+            for i in range(self.train_itrs):
 
-            self.feed_dict = {self.x : xtrain}
+                # batch_eps = np.random.randn(self.T, self.batch_size, self.z_size)
+	        xtrain,_ = train_data.next_batch(self.batch_size) # xtrain is (batch_size x img_size)
 
-	    results = sess.run(fetches, self.feed_dict)
-	    self.Lxs[i], self.Lzs[i], _ = results
+                self.feed_dict = {self.x : xtrain}
 
-	    if i % self.print_itrs  == 0:
-		print("iter=%d : Lx: %f Lz: %f" % (i, self.Lxs[i], self.Lzs[i]))
+	        results = sess.run(fetches, self.feed_dict)
+	        self.Lxs[i], self.Lzs[i], _ = results
+
+	        if i % self.print_itrs  == 0:
+		    print("iter=%d : Lx: %f Lz: %f" % (i, self.Lxs[i], self.Lzs[i]))
 
 
 
-        self.saver.save(sess,'draw.ckpt')
+                self.saver.save(sess, 'deep_feat_vae_checkpoint_{}_{}'.format(self.learning_rate , self.train_itrs))
 
 
 

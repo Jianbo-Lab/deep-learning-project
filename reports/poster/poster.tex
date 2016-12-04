@@ -153,8 +153,7 @@ linewidth=2pt % Width of the border lines around content boxes
 %\includegraphics[height=4em]{images/berkeley.png}
 } % First university/lab logo on the left
 {
-\bf
-\textsc{Variational Auto-encoders...?}
+{Variational Auto-encoders:\\Representations for image generation and semi-supervised learning}
 \vspace{0.5em}
 } % Poster title
 {\textsc{Jianbo Chen, Billy Fang, Cheng Ju
@@ -169,11 +168,13 @@ linewidth=2pt % Width of the border lines around content boxes
 %	OBJECTIVES
 %----------------------------------------------------------------------------------------
 
-\headerbox{Background}{name=Background,column=0,row=0}{
+\headerbox{Background, data, tools}{name=Background,column=0,row=0}{
 \begin{itemize}\compresslist
     \item Variational auto-encoders are useful for generating new examples from observed data
     \item Learns latent encoding of data
     \item Can be used for semi-supervised learning
+    \item Data: MNIST digits dataset and SVHN dataset
+    \item Tools: TensorFlow, GeForce GTX 770 GPU
 \end{itemize}
 %\vspace{0.3em} % When there are two boxes, some whitespace may need to be added if the one on the right has more content
 }
@@ -181,24 +182,33 @@ linewidth=2pt % Width of the border lines around content boxes
 %----------------------------------------------------------------------------------------
 %	INTRODUCTION
 %----------------------------------------------------------------------------------------
-\headerbox{VAE}{name=VAE,column=0,below=Background}{
-\begin{minipage}[b]{0.9\textwidth}
-\center
-\includegraphics[width=0.45\textwidth]{images/graphical_model.png}
-\includegraphics[width=0.45\textwidth]{images/vae.png}
-\end{minipage}
+
+\headerbox{Variational auto-encoder}{name=VAE,column=0,below=Background}{
+\begin{itemize}\compresslist
+    \item latent variable model: $z \sim \mathcal{N}(0,I)$, $x \mid z \sim f(x;z,\theta)$ (e.g. Bernoulli)
+    \item variational inference: maximize lower bound on log likelihood
+\end{itemize}
+%\begin{minipage}[b]{\textwidth}
+%\center
+%\includegraphics[width=0.45\textwidth]{images/graphical_model.png}
+%\includegraphics[width=0.9\textwidth]{images/vae2.png}
+%\centering
+%\end{minipage}
 \begin{equation}
 \log p(x)
 \ge \E_{z \sim Q(\cdot \mid x)}[\log p(x \mid z)]
 - \op{KL}(Q(z \mid x) \| p(z)).
 \end{equation}
-
 }
 
-\headerbox{CVAE}{name=CVAE,column=0,below=VAE}{
-\begin{minipage}[b]{0.9\textwidth}
+\headerbox{Conditional VAE (CVAE)}{name=CVAE,column=0,below=VAE}{
+\begin{itemize}\compresslist
+\item condition everything on label $y$
+\end{itemize}
+\begin{minipage}[b]{\textwidth}
 \center
-\includegraphics[width=\textwidth]{images/cvae.png}
+\includegraphics[width=0.9\textwidth]{images/cvae_simple.png}
+\centering
 \end{minipage}
 \begin{scriptsize}
 \begin{equation}
@@ -211,24 +221,25 @@ linewidth=2pt % Width of the border lines around content boxes
 
 
 \headerbox{CVAE for completion}{name=completion,column=0,below=CVAE}{ % This block's bottom aligns with the bottom of the conclusion block
-\begin{minipage}[b]{0.9\textwidth}
+\begin{minipage}[b]{\textwidth}
 \center
-\includegraphics[width=0.6\textwidth]{images/svhn_left_half.png}
-%\includegraphics[width=0.6\textwidth]{images/svhn_cvae_fc_style.png}
+\includegraphics[width=0.48\textwidth]{images/left_half.png}
+\includegraphics[width=0.48\textwidth]{images/svhn_left_half.png}
+\centering
 \end{minipage}
 }
 
 \headerbox{CVAE for style transfer}{name=style,column=0,below=completion}{ % This block's bottom aligns with the bottom of the conclusion block
-\begin{minipage}[b]{0.9\textwidth}
-\center
-%\includegraphics[width=0.6\textwidth]{images/svhn_left_half.png}
-\includegraphics[width=0.6\textwidth]{images/svhn_cvae_fc_style.png}
+\begin{minipage}[b]{\textwidth}
+\includegraphics[width=0.48\textwidth]{images/style.png}
+\includegraphics[width=0.48\textwidth]{images/svhn_cvae_fc_style.png}
+\centering
 \end{minipage}
 }
 
 
 
-\headerbox{Semi-supervised learning}{name=ssl,column=1}{
+\headerbox{Semi-supervised learning (SSL) VAE}{name=ssl,column=1}{
 \begin{itemize}\compresslist
     \item Handle datasets with missing labels
     \item Models label distribution
@@ -242,7 +253,8 @@ linewidth=2pt % Width of the border lines around content boxes
 \end{align}
 
 \begin{center}
-Validation/test error on MNIST
+Validation/test error on MNIST\\
+(55000 training examples)
 
 \begin{tabular}{c|r|r}
 & 1000 labeled & 600 labeled\\ \hline
@@ -256,50 +268,81 @@ Kingma et al. \cite{kingma2014semi}
 
 
 
-\headerbox{Adding GANs}{name=gan,column=1,below=ssl}{ % This block is as tall as the references
+\headerbox{DRAW}{name=DRAW,column = 1, below=ssl}{
+\begin{itemize}\compresslist
+\item attention-based sequential generation
+\item RNN structure
+\end{itemize}
+\begin{minipage}[b]{\textwidth}
+\includegraphics[width=0.6\textwidth]{images/draw_model.png}
+\includegraphics[width=0.38\textwidth]{images/cdraw.png}
+\centering
+\end{minipage}
+}
+
+
+
+\headerbox{Adding GANs}{name=gan,column=1,below=DRAW}{ % This block is as tall as the references
 \begin{itemize}\compresslist
     \item VAE output is often blurry
     \item Add discriminator to encourage sharpness
+    \item Replace decoder loss with comparison of discriminator layers
 \end{itemize}
 
-\begin{minipage}[b]{0.9\textwidth}
-\includegraphics[width=\textwidth]{images/vaegan.png}
-\end{minipage}
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.8\textwidth]{images/vaegan.png}
+%\centering
+%\end{minipage}
 
-Replace decoder loss with comparison of discriminator layers
 
-\begin{minipage}[b]{0.9\textwidth}
-\includegraphics[width=\textwidth]{images/vaegan2.png}
+\begin{minipage}[b]{\textwidth}
+\includegraphics[width=0.8\textwidth]{images/vaegan2.png}
+\centering
 \end{minipage}
 }
 
 
-\headerbox{CVAEGAN}{name=cvaegan,column=1,below=gan}{
+
+
+\headerbox{CVAE with GAN}{name=cvaegan,column=2,row=0}{
 CVAEGAN results here
 }
 
+\headerbox{SSL with GANs}{name=cvaegan,column=2,below=cvaegan}{
+CVAEGAN results here
+}
+
+\headerbox{DRAW with GANs}{name=drawgan,column=2,below=cvaegan}{
+\begin{itemize}\compresslist
+    \item Add GAN on the top of the last output of DRAW
+\end{itemize}
 
 
-
-
-
-\headerbox{Deep feature loss}{name=deep_feature,row=0,column = 2}{
-a
+\begin{minipage}[b]{\textwidth}
+\includegraphics[width=0.8\textwidth]{images/draw_gan.pdf}
+\centering
+\end{minipage}
 }
 
 
 
-\headerbox{Future Directions}{name=future,column=2,span=1,below = deep_feature}{ % This block is as tall as the references block
+
+
+
+
+
+
+\headerbox{Future Directions}{name=future,column=2, below=drawgan}{ % This block is as tall as the references block
 a
 %\vspace{0.3em}
- }
+}
 
 
 \renewcommand{\section}[2]{}% removes extraneous ``References'' section title
 \headerbox{References}{name=reference,column=2,span=1,above = bottom}{ % This block is as tall as the references block
 \bibliographystyle{plain}
-\bibliography{../final_report/cs294_bib}
-\nocite{kingma2013auto,doersch2016tutorial,larsen2015autoencoding,hou2016deep}
+\bibliography{cs294_bib}
+\nocite{kingma2013auto,kingma2014semi,gregor2015draw,larsen2015autoencoding,doersch2016tutorial}
 }
 
 
