@@ -39,8 +39,8 @@ def main():
     sess = tf.InteractiveSession()
     build_encoder = Encoder(enc_size)
     build_decoder = Decoder(dec_size)
-    build_discriminator = Discriminator_conv(100)
-    print_itrs = 500
+    build_discriminator = Discriminator_v3(100)
+    print_itrs = 100
 
 
     model =  DRAWGAN(sess, build_encoder, build_decoder, build_discriminator,

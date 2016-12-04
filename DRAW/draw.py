@@ -92,25 +92,25 @@ class DRAW():
 
         if load_file is not None:
             self.saver.restore(sess, load_file) # to restore from model, uncomment this line
-        else:
-
-            print(self.batch_size * self.train_itrs / 60000 )
-            for i in range(self.train_itrs):
-
-                # batch_eps = np.random.randn(self.T, self.batch_size, self.z_size)
-	        xtrain,_ = train_data.next_batch(self.batch_size) # xtrain is (batch_size x img_size)
-
-                self.feed_dict = {self.x : xtrain}
-
-	        results = sess.run(fetches, self.feed_dict)
-	        self.Lxs[i], self.Lzs[i], _ = results
-
-	        if i % self.print_itrs  == 0:
-		    print("iter=%d : Lx: %f Lz: %f" % (i, self.Lxs[i], self.Lzs[i]))
 
 
+        print(self.batch_size * self.train_itrs / 60000 )
+        for i in range(self.train_itrs):
 
-                self.saver.save(sess, 'deep_feat_vae_checkpoint_{}_{}'.format(self.learning_rate , self.train_itrs))
+            # batch_eps = np.random.randn(self.T, self.batch_size, self.z_size)
+	    xtrain,_ = train_data.next_batch(self.batch_size) # xtrain is (batch_size x img_size)
+
+            self.feed_dict = {self.x : xtrain}
+
+	    results = sess.run(fetches, self.feed_dict)
+	    self.Lxs[i], self.Lzs[i], _ = results
+
+	    if i % self.print_itrs  == 0:
+		print("iter=%d : Lx: %f Lz: %f" % (i, self.Lxs[i], self.Lzs[i]))
+
+
+
+        self.saver.save(sess, 'deep_feat_vae_checkpoint_{}_{}'.format(self.learning_rate , self.train_itrs))
 
 
 

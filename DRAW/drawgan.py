@@ -58,19 +58,19 @@ class DRAWGAN():
         #---------------------------------------------------------------
         # Build Graph
 
-        Lx, Lz, Lgan = self.build_DRAW()
+        enc_loss, dec_loss, draw_loss, dis_loss = self.build_DRAW()
 
-        cost = 0.0001 * Lx + 10 * Lz + 100 * Lgan
+        # cost = 0.1 * Lx + 0.01 * Lz +  Lgan
 
         ## OPTIMIZER ## 
         
-        optimizer=tf.train.AdamOptimizer(self.learning_rate, beta1 = 0.5)
-        grads=optimizer.compute_gradients(cost)
+        # optimizer=tf.train.AdamOptimizer(self.learning_rate, beta1 = 0.5)
+        # grads=optimizer.compute_gradients(cost)
 
-        for i,(g,v) in enumerate(grads):
-            if g is not None:
-                grads[i]=(tf.clip_by_norm(g,5),v) # clip gradients
-        train_op = optimizer.apply_gradients(grads)
+        # for i,(g,v) in enumerate(grads):
+        #     if g is not None:
+        #         grads[i]=(tf.clip_by_norm(g,5),v) # clip gradients
+        # train_op = optimizer.apply_gradients(grads)
                 
         ## RUN TRAINING ## 
 
@@ -82,22 +82,45 @@ class DRAWGAN():
 
         train_data = mnist.input_data.read_data_sets(data_directory, one_hot=True).train 
 
-        fetches=[]
-        fetches.extend([Lx, Lz, Lgan, train_op])
-        self.Lxs=[0] * self.train_itrs
-        self.Lzs=[0] * self.train_itrs
-        self.Lgans=[0] * self.train_itrs
+
         
         sess = self.sess
         
+        
+
+        vars = tf.trainable_variables()
+        vae_vars = [v for v in vars if not v.name.startswith('D/')]
+        dis_vars = [v for v in vars if  v.name.startswith('D/')]
+
+        self.vae_opt = tf.train.AdamOptimizer(self.learning_rate).minimize(draw_loss, var_list=vae_vars)
+        self.dis_opt = tf.train.AdamOptimizer(self.learning_rate).minimize(dis_loss, var_list=dis_vars)
+
         self.saver = tf.train.Saver() # saves variables learned during training
         tf.initialize_all_variables().run()
+
+
+        fetches_draw = []
+        fetches_draw.extend([enc_loss, dec_loss, self.vae_opt])
+
+        fetches_gan = []
+        fetches_gan.extend([dis_loss, self.dis_opt])
+
+        self.Lxs=[0] * self.train_itrs
+        self.Lzs=[0] * self.train_itrs
+        self.Lgans=[0] * self.train_itrs
+
+        # self.draw_loss=[0] * self.train_itrs
+        # self.dis_loss=[0] * self.train_itrs
+
 
         if load_file is not None:
             self.saver.restore(sess, load_file) # to restore from model, uncomment this line
 
         else:
             print(self.batch_size * self.train_itrs / 60000 )
+
+
+
             for i in range(self.train_itrs):
 
                 # batch_eps = np.random.randn(self.T, self.batch_size, self.z_size)
@@ -105,11 +128,15 @@ class DRAWGAN():
 
                 self.feed_dict = {self.x : xtrain}
 
-	        results = sess.run(fetches, self.feed_dict)
-	        self.Lxs[i], self.Lzs[i], self.Lgans[i], _ = results
+	        enc_loss, dec_loss, _ = sess.run(fetches_draw, self.feed_dict)
+                dis_loss, _ = sess.run(fetches_gan, self.feed_dict)
+
+                # self.draw_loss[i], self.dis_loss[i] = draw_loss, dis_loss
+	        self.Lxs[i], self.Lzs[i], self.Lgans[i] = dec_loss, enc_loss, dis_loss
             
 	        if i % self.print_itrs  == 0:
-		    print("iter=%d : Lx: %f Lz: %f Lgan %f" % (i, self.Lxs[i], self.Lzs[i], self.Lgans[i]))
+                    # print len(self.draw_loss), len(self.dis_loss)
+		    print("iter=%d : reconstruction loss: %f KL divergence %f gan loss: %f" % (i, self.Lxs[i], self.Lzs[i], self.Lgans[i]))
 
 
 
@@ -241,29 +268,42 @@ class DRAWGAN():
             """
 
             # true image
-            self.dis_real = self.build_discriminator(self.x,
+            self.dis_real,self.lth_layer_real = self.build_discriminator(self.x,
                                                      batch_size = self.batch_size,
-                                                    x_width=self.x_width
+                                                    # x_width=self.x_width
             )
 
+
+            
             # reconstruction
-            self.dis_fake_recon = self.build_discriminator(x_recons, reuse=True,
-                                                            batch_size = self.batch_size,
-                x_width=self.x_width
+            self.dis_fake_recon, self.lth_layer_recon  = self.build_discriminator(
+                x_recons, reuse=True,
+                batch_size = self.batch_size,
+                # x_width=self.x_width
                 )
 
 
             # fresh generation
-            self.dis_fake_fresh = self.build_discriminator(x_generates, reuse=True,
-                                                           batch_size = self.batch_size,
-                                                           x_width=self.x_width
+            self.dis_fake_fresh, _ = self.build_discriminator(x_generates,
+                            reuse=True,
+                            batch_size = self.batch_size, 
+                                                          #  x_width=self.x_width
             )
 
-        dis_loss = tf.reduce_mean(-tf.log(self.dis_real+1e-10)
-                                  - tf.log(1.-self.dis_fake_fresh+1e-10)
-                                  - tf.log(1.-self.dis_fake_recon+1e-10))
 
+        # self.decoder_loss = tf.reduce_sum(tf.square(self.lth_layer_real - self.lth_layer_recon))
+        print '############### Using reconstruction loss'
+        self.decoder_loss = tf.reduce_sum(tf.square(self.x - x_recons))
+
+        self.encoder_loss = Lz
+
+        self.cross_entropy_real =  -tf.log(self.dis_real+1e-10)
+        self.cross_entropy_fresh =   - tf.log(1.-self.dis_fake_fresh+1e-10)
+        self.xentropy_fresh_mean = tf.reduce_mean(self.cross_entropy_fresh)
+
+        self.dis_loss = tf.reduce_mean(self.cross_entropy_real + self.cross_entropy_fresh, name='xentropy_mean') 
+        self.draw_loss =  self.decoder_loss + self.encoder_loss - 5 *  self.xentropy_fresh_mean 
          
 
-        return (Lx, Lz, dis_loss)
+        return (self.encoder_loss, self.decoder_loss,  self.draw_loss, self.dis_loss )
 
