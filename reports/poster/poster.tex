@@ -153,7 +153,7 @@ linewidth=2pt % Width of the border lines around content boxes
 %\includegraphics[height=4em]{images/berkeley.png}
 } % First university/lab logo on the left
 {
-{Variational Auto-encoders:\\Representations for image generation and semi-supervised learning}
+{When Variational Auto-encoders meet Generative Adversarial Networks}
 \vspace{0.5em}
 } % Poster title
 {\textsc{Jianbo Chen, Billy Fang, Cheng Ju
@@ -168,48 +168,47 @@ linewidth=2pt % Width of the border lines around content boxes
 %	OBJECTIVES
 %----------------------------------------------------------------------------------------
 
-\headerbox{Background, data, tools}{name=Background,column=0,row=0}{
+
+\headerbox{Problems}{name=Problem,column=0,row=0}{
 \begin{itemize}\compresslist
-    \item Variational auto-encoders are useful for generating new examples from observed data
-    \item Learns latent encoding of data
-    \item Can be used for semi-supervised learning
-    \item Data: MNIST digits dataset and SVHN dataset
-    \item Tools: TensorFlow, GeForce GTX 770 GPU
+    \item Various generative model of images.
+    \item Various applications including semi-supervised learning.
+\end{itemize}
+}
+\headerbox{Backgrounds and Objectives}{name=Background,column=0,below = Problem}{
+\begin{itemize}\compresslist
+    \item Variational auto-encoders (VAE) use variational inference to learn intractable posterior distributions.
+    \item VAE's drawbacks: Images tend to be blurry.
+    \item Generative adversarial networks (GAN) learn a generative model based on game theory.
+    \item GAN's drawbacks: Difficult to train; No explicit representation of the generative distribution $p_g(x)$.
+    \item Intermediate Objectives: Investigate various types of VAE models. % Mention that we put emphasis on VAE.
+    \item Ultimate Goal: Combine VAE and GAN to get 'better' generative models.
 \end{itemize}
 %\vspace{0.3em} % When there are two boxes, some whitespace may need to be added if the one on the right has more content
 }
-
+%\headerbox{Data and Tools}{name=Data,column=0,below = Background}{
+%\begin{itemize}\compresslist
+%    \item Data: MNIST digits dataset and SVHN dataset
+%    \item Tools: TensorFlow, GeForce GTX 770 GPU
+%\end{itemize}
+%}
 %----------------------------------------------------------------------------------------
 %	INTRODUCTION
 %----------------------------------------------------------------------------------------
 
 \headerbox{Variational auto-encoder}{name=VAE,column=0,below=Background}{
+\textbf{Variational auto-encoder (VAE)}
 \begin{itemize}\compresslist
     \item latent variable model: $z \sim \mathcal{N}(0,I)$, $x \mid z \sim f(x;z,\theta)$ (e.g. Bernoulli)
     \item variational inference: maximize lower bound on log likelihood
 \end{itemize}
-%\begin{minipage}[b]{\textwidth}
-%\center
-%\includegraphics[width=0.45\textwidth]{images/graphical_model.png}
-%\includegraphics[width=0.9\textwidth]{images/vae2.png}
-%\centering
-%\end{minipage}
-\begin{equation}
-\log p(x)
-\ge \E_{z \sim Q(\cdot \mid x)}[\log p(x \mid z)]
-- \op{KL}(Q(z \mid x) \| p(z)).
-\end{equation}
-}
+\[\log p(x) \ge \E_{z \sim Q(\cdot \mid x)}[\log p(x \mid z)] - \op{KL}(Q(z \mid x) \| p(z)).\]
 
-\headerbox{Conditional VAE (CVAE)}{name=CVAE,column=0,below=VAE}{
+
+\textbf{Conditional VAE (CVAE)}
 \begin{itemize}\compresslist
-\item condition everything on label $y$
+\item condition everything on side information $y$ (label, partial image, etc.)
 \end{itemize}
-\begin{minipage}[b]{\textwidth}
-\center
-\includegraphics[width=0.9\textwidth]{images/cvae_simple.png}
-\centering
-\end{minipage}
 \begin{scriptsize}
 \begin{equation}
 \log p(x \mid y)
@@ -217,33 +216,180 @@ linewidth=2pt % Width of the border lines around content boxes
 - \op{KL}(Q(z \mid x,y) \| p(z \mid y)).
 \end{equation}
 \end{scriptsize}
+
+\begin{minipage}[b]{\textwidth}
+\center
+\includegraphics[width=0.9\textwidth]{images/cvae_simple.png}
+\centering
+\end{minipage}
+
+
+%\begin{minipage}[b]{\textwidth}
+%\center
+%\includegraphics[width=0.45\textwidth]{images/graphical_model.png}
+%\includegraphics[width=0.9\textwidth]{images/vae2.png}
+%\centering
+%\end{minipage}
+%\begin{equation}
+%\log p(x)
+%\ge \E_{z \sim Q(\cdot \mid x)}[\log p(x \mid z)]
+%- \op{KL}(Q(z \mid x) \| p(z)).
+%\end{equation}
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.48\textwidth]{images/vae_images.png}
+%\centering
+%\end{minipage}
 }
 
+%\headerbox{Conditional VAE (CVAE)}{name=CVAE,column=0,below=VAE}{
+%\begin{itemize}\compresslist
+%\item condition everything on label $y$
+%\end{itemize}
+%\begin{minipage}[b]{\textwidth}
+%\center
+%\includegraphics[width=0.9\textwidth]{images/cvae_simple.png}
+%\centering
+%\end{minipage}
+%\begin{scriptsize}
+%\begin{equation}
+%\log p(x \mid y)
+%\ge \E_{z \sim Q(\cdot \mid y,x)}[\log p(x \mid y,z)]
+%- \op{KL}(Q(z \mid x,y) \| p(z \mid y)).
+%\end{equation}
+%\end{scriptsize}
+%\begin{minipage}[b]{\textwidth}
+%\center
+%\includegraphics[width=0.48\textwidth]{images/cvae_images.png}
+%\centering
+%\end{minipage}
+%}
 
-\headerbox{CVAE for completion}{name=completion,column=0,below=CVAE}{ % This block's bottom aligns with the bottom of the conclusion block
+\headerbox{CVAE for image completion}{name=completion,column=0,below=VAE}{ % This block's bottom aligns with the bottom of the conclusion block
+Generator receives half the image, generates the rest
+
 \begin{minipage}[b]{\textwidth}
 \center
 \includegraphics[width=0.48\textwidth]{images/left_half.png}
 \includegraphics[width=0.48\textwidth]{images/svhn_left_half.png}
 \centering
 \end{minipage}
+
+
 }
 
 \headerbox{CVAE for style transfer}{name=style,column=0,below=completion}{ % This block's bottom aligns with the bottom of the conclusion block
+Transferring the style of the first column to all digits
+
 \begin{minipage}[b]{\textwidth}
 \includegraphics[width=0.48\textwidth]{images/style.png}
-\includegraphics[width=0.48\textwidth]{images/svhn_cvae_fc_style.png}
+\includegraphics[width=0.46\textwidth]{images/svhn_cvae_fc_style.png}
 \centering
 \end{minipage}
 }
 
 
 
-\headerbox{Semi-supervised learning (SSL) VAE}{name=ssl,column=1}{
+
+
+
+
+
+
+
+
+\headerbox{Adding GANs}{name=gan,row=0, column=1}{ % This block is as tall as the references
+\begin{itemize}\compresslist
+    \item Add discriminator $D$ to encourage sharpness
+    \item   Replace the pixel-wise VAE reconstruction loss by learned feature representations in GAN discriminator.
+    \item Objective for the generator (VAE) $G$:
+    $$
+    \mathcal{L} = \mathcal{L}_{\textit{KL}} + \mathcal{L}_{\textit{REC}} + \mathcal{L}_{\textit{GAN}},
+    $$
+    where
+    %\begin{scriptsize}
+    \begin{align}
+    \mathcal{L}_{\textit{prior}}& =  KL(p_z(z),q(z|x))\\
+    \mathcal{L}_{\textit{REC}} &=  \mathbb{E}_{q(Z|X)}[p(\textit{Dis}_l(X)|Z)]  \\
+    \mathcal{L}_{\textit{GAN}} &= \mathbb{E}_{z\tilde p_z(z)}[\log  D(G(z))].
+    \end{align}
+    %\end{scriptsize}
+    \item Objective for the discriminator $D$:
+    $$
+    \mathbb{E}_{x\tilde p_{\textit{data}}}[\log D(x)] + \mathbb{E}_{z\tilde p_z(z)}[\log (1 - D(G(z)))]
+    $$
+\item In our implementations we borrow the DCGAN architecture \cite{radford2015unsupervised}
+\end{itemize}
+
+
+
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.8\textwidth]{images/vaegan.png}
+%\centering
+%\end{minipage}
+
+
+
+\begin{minipage}[b]{\textwidth}
+\includegraphics[width=0.6\textwidth]{images/vaegan2.png}
+\centering
+\end{minipage}
+
+Generated output of VAE with GAN (right) and without (left).
+
+\begin{minipage}[b]{\textwidth}
+\includegraphics[height=2in]{images/vae_images.png}
+\includegraphics[height=2in]{images/VAEGAN_gen_conv.png}
+\centering
+\end{minipage}
+%\begin{minipage}[b]{0.4\textwidth}
+%\includegraphics[width=0.48\textwidth]{images/vae_images.png}
+%\includegraphics[width=0.4\textwidth]{images/vaegan_images.png}
+%\centering
+%\end{minipage}
+}
+
+
+
+
+\headerbox{CVAE with CGAN}{name=cvaegan,column=1,below=gan}{
+\begin{itemize}\compresslist
+ \item Add a conditional GAN on top of a conditional VAE.
+    \item A conditional GAN has a discriminator assigning probability to real images with different labels and fake images as a single class respectively.
+   \cite{mirza2014conditional}
+\end{itemize}
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.8\textwidth]{images/cvaegan_structure.png}
+%\centering
+%\end{minipage}
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.45\textwidth]{images/cvaegan_images1.png}
+%\centering
+%\end{minipage}
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.45\textwidth]{images/cvaegan_images2.png}
+%\centering
+%\end{minipage}
+
+\begin{minipage}[b]{\textwidth}
+\includegraphics[height=2.2in]{images/by_label.png}
+\includegraphics[height=2.2in]{images/cvaegan_images1.png}
+\centering
+\end{minipage}
+
+\begin{minipage}[b]{\textwidth}
+\center
+\includegraphics[height=2.2in]{images/svhn_cvae_fc_label_gen.png}
+\includegraphics[height=2.2in]{images/cvaegan_images2.png}
+\centering
+\end{minipage}
+}
+
+\headerbox{Semi-supervised learning (SSL) VAE}{name=ssl,column=2, row=0}{
 \begin{itemize}\compresslist
     \item Handle datasets with missing labels
     \item Models label distribution
     \item Labeled and unlabeled examples enter loss differently
+    \item Use the encoder as a classifier.
 \end{itemize}
 \begin{align}
 \log p(x,y)
@@ -264,14 +410,31 @@ Kingma et al. \cite{kingma2014semi}
 & 2.4\% & 2.6\%
 \end{tabular}
 \end{center}
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.5\textwidth]{images/SSL_generate_conv_1000.png}
+%\centering
+%\end{minipage}
 }
 
-
-
-\headerbox{DRAW}{name=DRAW,column = 1, below=ssl}{
+\headerbox{SSL with GANs}{name=sslgan,column=2,below=ssl}{
 \begin{itemize}\compresslist
-\item attention-based sequential generation
+ \item Add a conditional GAN on top of a SSL VAE.
+ \item Both the discriminator of CGAN and the encoder of SSL VAE can be used as a classifier. We used the latter.
+ \item Performance: Currently similar to SSL VAE.
+\end{itemize}
+%\begin{minipage}[b]{\textwidth}
+%\includegraphics[width=0.8\textwidth]{images/sslgan_structure.png}
+%\centering
+%\end{minipage}
+}
+
+\headerbox{DRAW}{name=DRAW,column = 2, below=sslgan}{
+\begin{itemize}\compresslist
+\item Attention-based sequential generation
 \item RNN structure
+\item Generalization 1: Condition DRAW on labels (output appears below).
+\item Generalization 2: Taking DRAW as a black-box VAE, add GAN on top of it.
+
 \end{itemize}
 \begin{minipage}[b]{\textwidth}
 \includegraphics[width=0.6\textwidth]{images/draw_model.png}
@@ -280,69 +443,55 @@ Kingma et al. \cite{kingma2014semi}
 \end{minipage}
 }
 
+%\headerbox{DRAW with GANs}{name=drawgan,column=2,below=cvaegan}{
+%\begin{itemize}\compresslist
+%    \item Add GAN on the top of the last output of DRAW
+%\end{itemize}
 
-
-\headerbox{Adding GANs}{name=gan,column=1,below=DRAW}{ % This block is as tall as the references
-\begin{itemize}\compresslist
-    \item VAE output is often blurry
-    \item Add discriminator to encourage sharpness
-    \item Replace decoder loss with comparison of discriminator layers
-\end{itemize}
 
 %\begin{minipage}[b]{\textwidth}
-%\includegraphics[width=0.8\textwidth]{images/vaegan.png}
+%\includegraphics[width=0.8\textwidth]{images/draw_gan.pdf}
 %\centering
 %\end{minipage}
-
-
-\begin{minipage}[b]{\textwidth}
-\includegraphics[width=0.8\textwidth]{images/vaegan2.png}
-\centering
-\end{minipage}
-}
+%}
 
 
 
 
-\headerbox{CVAE with GAN}{name=cvaegan,column=2,row=0}{
-CVAEGAN results here
-}
 
-\headerbox{SSL with GANs}{name=cvaegan,column=2,below=cvaegan}{
-CVAEGAN results here
-}
 
-\headerbox{DRAW with GANs}{name=drawgan,column=2,below=cvaegan}{
+
+
+\headerbox{Future Directions}{name=future,column=2, below=DRAW}{ % This block is as tall as the references block
+%a
 \begin{itemize}\compresslist
-    \item Add GAN on the top of the last output of DRAW
+\item Improve our GAN-based models for
+\begin{itemize}
+\item VAE (generating more diverse digits)
+\item SSL (better classification accuracy)
+\item DRAW (better generation)
 \end{itemize}
-
-
-\begin{minipage}[b]{\textwidth}
-\includegraphics[width=0.8\textwidth]{images/draw_gan.pdf}
-\centering
-\end{minipage}
+\item Consider alternate classifiers for SSL: encoder, discriminator, or some combination?
+\end{itemize}
 }
+ % This block is as tall as the references block
+%Autoencoding beyond pixels using a learned similarity metric
 
+%conditional gan
 
+%draw
 
-
-
-
-
-
-
-\headerbox{Future Directions}{name=future,column=2, below=drawgan}{ % This block is as tall as the references block
-a
 %\vspace{0.3em}
-}
+
 
 
 \renewcommand{\section}[2]{}% removes extraneous ``References'' section title
 \headerbox{References}{name=reference,column=2,span=1,above = bottom}{ % This block is as tall as the references block
+\begin{footnotesize}
 \bibliographystyle{plain}
 \bibliography{cs294_bib}
-\nocite{kingma2013auto,kingma2014semi,gregor2015draw,larsen2015autoencoding,doersch2016tutorial}
+\nocite{kingma2013auto,kingma2014semi,gregor2015draw,larsen2015autoencoding,doersch2016tutorial,radford2015unsupervised}
+\end{footnotesize}
 }
 
 
