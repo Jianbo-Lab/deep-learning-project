@@ -197,17 +197,17 @@ linewidth=2pt % Width of the border lines around content boxes
 %----------------------------------------------------------------------------------------
 
 \headerbox{Variational auto-encoder}{name=VAE,column=0,below=Background}{
-\textbf{Variational auto-encoder (VAE)}
+\textbf{Variational auto-encoder (VAE)} \cite{kingma2013auto}
 \begin{itemize}\compresslist
-    \item latent variable model: $z \sim \mathcal{N}(0,I)$, $x \mid z \sim f(x;z,\theta)$ (e.g. Bernoulli)
-    \item variational inference: maximize lower bound on log likelihood
+    \item Latent variable model: $z \sim \mathcal{N}(0,I)$, $x \mid z \sim f(x;z,\theta)$ (e.g. Bernoulli)
+    \item Variational inference: maximize lower bound on log likelihood
 \end{itemize}
 \[\log p(x) \ge \E_{z \sim Q(\cdot \mid x)}[\log p(x \mid z)] - \op{KL}(Q(z \mid x) \| p(z)).\]
 
 
-\textbf{Conditional VAE (CVAE)}
+\textbf{Conditional VAE (CVAE)} \cite{sohn2015learning}
 \begin{itemize}\compresslist
-\item condition everything on side information $y$ (label, partial image, etc.)
+\item Condition everything on side information $y$ (label, partial image, etc.)
 \end{itemize}
 \begin{scriptsize}
 \begin{equation}
@@ -300,7 +300,7 @@ Transferring the style of the first column to all digits
 \headerbox{Adding GANs}{name=gan,row=0, column=1}{ % This block is as tall as the references
 \begin{itemize}\compresslist
     \item Add discriminator $D$ to encourage sharpness
-    \item   Replace the pixel-wise VAE reconstruction loss by learned feature representations in GAN discriminator.
+    \item   Replace the pixel-wise VAE reconstruction loss by learned feature representations in GAN discriminator. \cite{larsen2015autoencoding}
     \item Objective for the generator (VAE) $G$:
     $$
     \mathcal{L} = \mathcal{L}_{\textit{KL}} + \mathcal{L}_{\textit{REC}} + \mathcal{L}_{\textit{GAN}},
@@ -317,7 +317,7 @@ Transferring the style of the first column to all digits
     $$
     \mathbb{E}_{x\tilde p_{\textit{data}}}[\log D(x)] + \mathbb{E}_{z\tilde p_z(z)}[\log (1 - D(G(z)))]
     $$
-\item In our implementations we borrow the DCGAN architecture \cite{radford2015unsupervised}
+\item In our implementations we use the DCGAN architecture \cite{radford2015unsupervised}
 \end{itemize}
 
 
@@ -388,18 +388,21 @@ Generated output of VAE with GAN (right) and without (left).
 \begin{itemize}\compresslist
     \item Handle datasets with missing labels
     \item Models label distribution
-    \item Labeled and unlabeled examples enter loss differently
+    \item Labeled and unlabeled examples enter loss differently: see $\mathcal{L}(x,y)$ and $\mathcal{U}(x)$ below
     \item Use the encoder as a classifier.
 \end{itemize}
+Labeled and unlabeled loss, respectively:
+\begin{small}
 \begin{align}
 \log p(x,y)
 &\ge \E_{z \sim Q(z \mid x,y)}[\log p(x \mid y,z) + \log p(y)]\\
 &\qquad - \op{KL}(Q(z \mid x,y) \| p(z)) =: - \mathcal{L}(x,y)\\
-\log p(x) &\ge \sum_y q(y \mid x) (-\mathcal{L}(x,y)) + H(q(y \mid x))
+\log p(x) &\ge \sum_y q(y \mid x) (-\mathcal{L}(x,y)) + H(q(y \mid x)) =: -\mathcal{U}(x).
 \end{align}
+\end{small}
 
 \begin{center}
-Validation/test error on MNIST\\
+Validation/test error on MNIST
 (55000 training examples)
 
 \begin{tabular}{c|r|r}
@@ -471,7 +474,8 @@ Kingma et al. \cite{kingma2014semi}
 \item SSL (better classification accuracy)
 \item DRAW (better generation)
 \end{itemize}
-\item Consider alternate classifiers for SSL: encoder, discriminator, or some combination?
+\item Consider alternate classifiers for SSL with GAN: encoder, discriminator, or some ensemble?
+\item Investigate assessment of generative models.
 \end{itemize}
 }
  % This block is as tall as the references block
@@ -490,7 +494,7 @@ Kingma et al. \cite{kingma2014semi}
 \begin{footnotesize}
 \bibliographystyle{plain}
 \bibliography{cs294_bib}
-\nocite{kingma2013auto,kingma2014semi,gregor2015draw,larsen2015autoencoding,doersch2016tutorial,radford2015unsupervised}
+\nocite{kingma2013auto,kingma2014semi,gregor2015draw,larsen2015autoencoding,doersch2016tutorial,radford2015unsupervised,sohn2015learning}
 \end{footnotesize}
 }
 
