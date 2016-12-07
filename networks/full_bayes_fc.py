@@ -51,8 +51,8 @@ class Decoder:
 
 
         h0 = tf.nn.softplus(tf.matmul(z, w[0]) + b[0])
-        h1 = tf.nn.softplus(tf.matmul(z, w[1]) + b[1])
-        x_mean = tf.nn.sigmoid(tf.matmul(z, w[2]) + b[2])
+        h1 = tf.nn.softplus(tf.matmul(h0, w[1]) + b[1])
+        x_mean = tf.nn.sigmoid(tf.matmul(h1, w[2]) + b[2])
         return x_mean
 
 

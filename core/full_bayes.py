@@ -212,7 +212,9 @@ class Full_Bayes():
         # Compute the loss from decoder (empirically).
         #self.decoder_loss = -tf.reduce_sum(self.images * tf.log(1e-10 + self.decoder_mean) + (1 - self.images) * tf.log(1e-10 + 1 - self.decoder_mean), 1)
         # Gaussian loss
-        self.decoder_loss = 0.5 * tf.reduce_sum((self.images - self.decoder_mean)**2, 1)
+        self.decoder_loss = 100 * tf.reduce_sum((self.images - self.decoder_mean)**2, 1)
+
+
         # Compute the loss from encoder (analytically).
         self.encoder_loss = -0.5 * tf.reduce_sum(1 + self.encoder_log_sigma2
                                            - tf.square(self.encoder_mean)
@@ -242,9 +244,12 @@ class Full_Bayes():
         "We require the number of images to be generated smaller than the batch size."
         # Sample z from standard normals.
         sampled_z = np.random.randn(self.batch_size,self.z_dim)
+
+        # posterior generation?
         eps_w = []
         eps_b = []
         for i in xrange(1,len(self.dec_dims)):
+
             eps_w.append(np.random.randn(self.dec_dims[i-1], self.dec_dims[i]))
             eps_b.append(np.random.randn(self.dec_dims[i]))
             #eps_w.append(np.zeros((self.dec_dims[i-1], self.dec_dims[i])))
