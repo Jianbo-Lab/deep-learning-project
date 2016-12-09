@@ -303,19 +303,19 @@ Transferring the style of the first column to all digits
     \item   Replace the pixel-wise VAE reconstruction loss by learned feature representations in GAN discriminator. \cite{larsen2015autoencoding}
     \item Objective for the generator (VAE) $G$:
     $$
-    \mathcal{L} = \mathcal{L}_{\textit{KL}} + \mathcal{L}_{\textit{REC}} + \mathcal{L}_{\textit{GAN}},
+    \mathcal{L} = \mathcal{L}_{\textit{prior}} + \mathcal{L}_{\textit{REC}} + \mathcal{L}_{\textit{GAN}},
     $$
     where
     %\begin{scriptsize}
     \begin{align}
     \mathcal{L}_{\textit{prior}}& =  KL(p_z(z),q(z|x)),\\
-    \mathcal{L}_{\textit{REC}} &=  \mathbb{E}_{q(Z|X)}[p(\textit{Dis}_l(X)|Z)],\\
-    \mathcal{L}_{\textit{GAN}} &= \mathbb{E}_{z\tilde p_z(z)}[\log  D(G(z))].
+    \mathcal{L}_{\textit{REC}} &= -\mathbb{E}_{q(Z|X)}[p(\textit{Dis}_l(X)|Z)],\\
+    \mathcal{L}_{\textit{GAN}} &= -\mathbb{E}_{z\sim p_z(z)}[\log  D(G(z))].
     \end{align}
     %\end{scriptsize}
     \item Objective for the discriminator $D$:
     $$
-    \mathbb{E}_{x\tilde p_{\textit{data}}}[\log D(x)] + \mathbb{E}_{z\tilde p_z(z)}[\log (1 - D(G(z)))].
+    -\mathbb{E}_{x\sim p_{\textit{data}}}[\log D(x)] - \mathbb{E}_{z\sim p_z(z)}[\log (1 - D(G(z)))].
     $$
 \item In our implementations we use the DCGAN architecture \cite{radford2015unsupervised}
 \end{itemize}
