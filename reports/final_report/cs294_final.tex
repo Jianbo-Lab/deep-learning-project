@@ -108,8 +108,8 @@
 
 
 \begin{abstract}
-In this project, we first review variational auto-encoders (VAE) and its popular variants including the Conditional VAE \cite{sohn2015learning}, VAE for semi-supervised learning \cite{DBLP:journals/corr/KingmaRMW14} and DRAW \cite{chung2015recurrent}. We also investigated various applications of variational auto-encoders.
-Finally, we attempt to combine variants of VAE with another popular deep generative model: generative adversarial networks \cite{goodfellow2014gan}, generalizing the idea proposed in \cite{larsen2015autoencoding}.
+Variational auto-encoders are a promising class of generative models. In this project, we first review variational auto-encoders (VAE) and its popular variants including the Conditional VAE \cite{sohn2015learning}, VAE for semi-supervised learning \cite{DBLP:journals/corr/KingmaRMW14} and DRAW \cite{chung2015recurrent}. We also investigate various applications of variational auto-encoders.
+Finally, we propose models which combine variants of VAE with another popular deep generative model: generative adversarial networks \cite{goodfellow2014gan}, generalizing the idea proposed in \cite{larsen2015autoencoding}.
 \end{abstract}
 
 
@@ -119,7 +119,7 @@ In practice, millions of images and videos are unlabeled and one can leverage th
 One approach for unsupervised learning is to learn a generative model.
 Two popular methods in computer vision are variational auto-encoders (VAEs) \cite{kingma2013auto} and generative adversarial networks (GANs) \cite{goodfellow2014gan}.
 
-Variational auto-encoders are a class of deep generative models based on variational methods in Bayesian inference. %There exist many variants including conditional VAEs \cite{doersch2016tutorial}, VAEs tailored for semi-supervised learning \cite{DBLP:journals/corr/KingmaRMW14}, attention-based generative models \cite{gregor2015draw}, and more.
+Variational auto-encoders are a class of deep generative models based on variational methods. %There exist many variants including conditional VAEs \cite{doersch2016tutorial}, VAEs tailored for semi-supervised learning \cite{DBLP:journals/corr/KingmaRMW14}, attention-based generative models \cite{gregor2015draw}, and more.
 With sophisticated VAE models, one can not only generate realistic images, but also replicate consistent ``style.'' For example, DRAW \cite{gregor2015draw} was able to generate images of house numbers with number combinations not seen in the training set, but with a consistent style/color/font of street sign in each image. Additionally, as models learn to generate realistic output, they learn important features along the way, which potentially can be used for classification; we consider this in the Conditional VAE and semi-supervised learning models.
 However, one main criticism of VAE models is that their generated output is often blurry.
 
@@ -703,7 +703,7 @@ The results show that it is not plausible if we take DRAW as a black box and put
 \end{figure}
 
 \section{Conclusion and Future Work}
-VAEs and GANs are two promising classes of generative models which have their respective drawbacks. For example, VAEs generate blurry images while GANs are difficult to train and generate images which lack variaty. This work serves as an initiate of combining various variants of VAEs with GANs. In particular, we propose CVAE-GAN, SSL-VAE-GAN and DRAW-GAN. We also apply generative models to the problems of image completion, style transfer and semi-supervised learning. While CVAE-GAN generated better images than the baseline model CVAE, SSL-VAE-GAN and DRAW-GAN fail to achieve expected performance. We propose several potential solutions to these problems and leave them to future work.
+Variational auto-encoders and generative adversarial networks are two promising classes of generative models which have their respective drawbacks. For example, VAEs generate blurry images while GANs are difficult to train and generate images which lack variaty. This work serves as an initiate of combining various variants of VAEs with GANs. In particular, we propose CVAE-GAN, SSL-VAE-GAN and DRAW-GAN. We also apply generative models to the problems of image completion, style transfer and semi-supervised learning. While CVAE-GAN generated better images than the baseline model CVAE, SSL-VAE-GAN and DRAW-GAN fail to achieve expected performance. We propose several potential solutions to these problems and leave them to future work.
 \section{Lessons Learned}
 \begin{itemize}
 \item TensorFlow, although tricky to learn at first, became quite helpful when building more complicated models. In particular, the TensorFlow-Slim library allowed us to access standard neural network layers easily so that we did not have to manage weights and variables manually.
