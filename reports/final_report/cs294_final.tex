@@ -260,7 +260,7 @@ The CVAE structure appears in \autoref{figure:cvae_model}. Structurally, the onl
 
 At generation time, we input not only a fresh sample $z \sim \mathcal{N}(0,I)$, but also some side information $y$ into the decoder. We explore different examples of side information in \autoref{sub:cvae_app}.
 \subsection{Semi-supervised learning}
-Kingma et al. \cite{kingma2014semi} introduced a variant of the VAE framework tailored for semi-supervised learning (SSL), where the goal is classification after training on a dataset that has both labeled and unlabeled examples. Unlike the CVAE where everything was conditioned on the label $y$, the SSL model gives $y$ a categorical distribution. The generative model (called ``M2'' in \cite{kingma2014semi}) is as follows.
+Kingma et al. \cite{DBLP:journals/corr/KingmaRMW14} introduced a variant of the VAE framework tailored for semi-supervised learning (SSL), where the goal is classification after training on a dataset that has both labeled and unlabeled examples. Unlike the CVAE where everything was conditioned on the label $y$, the SSL model gives $y$ a categorical distribution. The generative model (called ``M2'' in \cite{DBLP:journals/corr/KingmaRMW14}) is as follows.
 \begin{align}
 y &\sim \op{Cat}(\pi)\\
 z &\sim \mathcal{N}(0,I)\\
@@ -320,7 +320,7 @@ The total loss is
 \sum_{\text{labeled $(x,y)$}} \mathcal{L}(x,y)
 + \sum_{\text{unlabeled $x$}} \mathcal{U}(x).
 \end{equation}
-In \cite{kingma2014semi}, they also add an extra classification loss $\alpha \mathbb{E}_{\text{labeled $(x,y)$}}[-\log Q(y \mid x)]$ so that the predictive distribution $q(y \mid x)$ also contributes to $\mathcal{L}(x,y)$.
+In \cite{DBLP:journals/corr/KingmaRMW14}, they also add an extra classification loss $\alpha \mathbb{E}_{\text{labeled $(x,y)$}}[-\log Q(y \mid x)]$ so that the predictive distribution $q(y \mid x)$ also contributes to $\mathcal{L}(x,y)$.
 
 We can use this for labeled image generation as before: input $z \sim \mathcal{N}(0,I)$ and $y$ into the decoder.
 
@@ -548,7 +548,7 @@ The CVAE can be used to transfer style from one image to the generated output. T
 
 \subsection{Semi-supervised learning}
 
-This experiment compares the performance of VAE and that of VAE-GAN in semi-supervised learning. We followed the ``M2'' model of \cite{kingma2014semi} depicted in \autoref{figure:ssl_model}.
+This experiment compares the performance of VAE and that of VAE-GAN in semi-supervised learning. We followed the ``M2'' model of \cite{DBLP:journals/corr/KingmaRMW14} depicted in \autoref{figure:ssl_model}.
 
 We took the $55000$ examples in the MNIST dataset and retained only $1000$ or $600$ of the labels (so that more than $98\%$ of the data is unlabeled!), with each label equally represented.
 
@@ -660,7 +660,7 @@ We considered both a fully-connected architecture and a convolutional architectu
      \end{itemize}
 \end{itemize}
 
-  \autoref{table:SSL_error} shows the resulting classification error on the test dataset. Currently we are unable to perform as well as the original paper \cite{kingma2014semi}. Some potential reasons are that we have pooling after convolutional layers, we are not using the most appropriate activation functions in the discriminator and in the generator and there are fully connected layers in the network. We are currently working on new network structures that replace pooling by strided convolutions (discriminator) and fractional-strided convolutions (decoder), repace ReLU in the discriminator by LeakyReLU and remove unnecessary fully connected layers (as suggested in \cite{alec2016dcgan}).
+  \autoref{table:SSL_error} shows the resulting classification error on the test dataset. Currently we are unable to perform as well as the original paper \cite{DBLP:journals/corr/KingmaRMW14}. Some potential reasons are that we have pooling after convolutional layers, we are not using the most appropriate activation functions in the discriminator and in the generator and there are fully connected layers in the network. We are currently working on new network structures that replace pooling by strided convolutions (discriminator) and fractional-strided convolutions (decoder), repace ReLU in the discriminator by LeakyReLU and remove unnecessary fully connected layers (as suggested in \cite{alec2016dcgan}).
 
 \begin{table}[!ht]
 \centering
@@ -669,7 +669,7 @@ We considered both a fully-connected architecture and a convolutional architectu
 Fully connected &  5.1\% &  12.0\%\\
 Convolutional &  4.8\% &  6.2\%\\
 Convolutional with GAN &  8.1\% &  9.2\%\\
-Kingma et al. \cite{kingma2014semi}
+Kingma et al. \cite{DBLP:journals/corr/KingmaRMW14}
 & 2.4\% & 2.6\%
 \end{tabular}
 \caption{Validation/test error on MNIST (55000 training examples)}
