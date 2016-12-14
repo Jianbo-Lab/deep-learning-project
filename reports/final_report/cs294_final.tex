@@ -356,7 +356,7 @@ $$L^z = \sum_{t=1}^{T} KL(Q(Z_t|h_{t}^{enc})||Z_t) = \frac{1}{2}\sum_{t=1}^{T}(\
 The total loss L for the network is the expectation of the sum of the reconstruction and latent losses:
 $$L = \E_{z \sim Q} (L^z + L^x).$$
 
-Conditional DRAW is an extension of vanilla DRAW. The input of the encoder and decoder of conditional DRAW is the same as vanilla DRAW, except the additional information (e.g. the label of the image).
+Conditional DRAW is an extension of vanilla DRAW analogous to the CVAE described above. The input of the encoder and decoder of conditional DRAW is the same as vanilla DRAW, except with additional information (e.g. the label of the image).
 
 
 
@@ -742,8 +742,8 @@ Variational auto-encoders and generative adversarial networks are two promising 
 
 \begin{itemize}
 \item Jianbo Chen (?\%): implemented VAE framework on which all other implementations are based, improved convolutional architecture, improved/implemented GAN-based models, contributed to poster, wrote report
-\item Billy Fang (?\%): implemented CVAE (with digit generation, image completion, and style transfer), implemented SSL, implemented baseline GAN-based models, contributed to poster, wrote report.
-\item Cheng Ju (?\%): implemented and experimented with DRAW, conditional DRAW, DRAW with GAN. Build general DRAW object that has options to construct flexible combinations of DRAW variants (conditional/unconditional and vanilla/GAN)
+\item Billy Fang (?\%): implemented CVAE (with digit generation, image completion, and style transfer), implemented SSL, implemented baseline GAN-based models, contributed to poster, wrote report
+\item Cheng Ju (?\%): implemented and experimented with DRAW, conditional DRAW, DRAW with GAN. Build general DRAW object that has options to construct flexible combinations of DRAW variants (conditional/unconditional and vanilla/GAN), wrote report
 \end{itemize}
 
 
