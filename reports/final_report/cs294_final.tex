@@ -356,6 +356,8 @@ $$L^z = \sum_{t=1}^{T} KL(Q(Z_t|h_{t}^{enc})||Z_t) = \frac{1}{2}\sum_{t=1}^{T}(\
 The total loss L for the network is the expectation of the sum of the reconstruction and latent losses:
 $$L = \E_{z \sim Q} (L^z + L^x).$$
 
+Conditional DRAW is an extension of vanilla DRAW. The input of the encoder and decoder of conditional DRAW is the same as vanilla DRAW, except the additional information (e.g. the label of the image).
+
 
 
 
@@ -691,7 +693,7 @@ This experiment compares the performance of DRAW and DRAW-GAN.
 \item Decoder: a standard LSTM cell. The size of the hidden state is 256.
 
 
-\item Discriminator (for DRAW-GAN): we use the same discriminator as CVAE. Due to the limited space, we only report the experimental results for vanilla DRAW and DRAW-GAN (omitting conditional DRAW results). In addition, replacing the decoder loss with deep feature did not give satisfactory performance. Thus we used the reconstruction loss on the original image.
+\item Discriminator (for DRAW-GAN): we use the same discriminator as CVAE. Due to the limited space, we only report the experimental results for vanilla DRAW and DRAW-GAN (omitting conditional DRAW results). In addition, replacing the decoder loss with GAN layer loss did not give satisfactory performance. Thus we used the reconstruction loss on the original image (the L2 or cross-entropy loss between original image and reconstructed image).
 \[
 \text{Input } x: [28\times 28] \to \text{conv3-16} \to \text{conv3-32} \to \text{conv3-64} \\
 \to \text{FC-512} \to \left\{\begin{array}{lr}
