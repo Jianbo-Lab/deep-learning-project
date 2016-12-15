@@ -428,7 +428,7 @@ L_D &= CrossEntropy(D(x),y)\\
 where $z$ is generated from the prior of latent variables and $y_{fake}$ is the label for the extra $(k+1)$st class.
 
 
-\subsection{SSL with GAN}
+\subsection{SSL with GAN}\label{sub:ssl_gan}
 The VAE tailored for semi-supervised learning (SSL) can also be incorporated with a $k+1$-class GAN in a similar way as CVAE. Recall that the VAE-SSL loss is divided into two parts: a loss for labeled data and a loss for unlabeled data. The method of incorporating GAN to VAE-SSL is exactly the same as that of CVAE for labeled data; refer to the previous section for details. For unlabeled data, recall that the VAE loss is
 $$
 \sum_y Q(y \mid x) (-\mathcal{L}(x,y)) + H(Q(y \mid x)) =: -\mathcal{U}(x),
@@ -658,8 +658,8 @@ We considered both a fully-connected architecture and a convolutional architectu
         \to
         \text{output $x$: $[28 \times 28]$}
         \end{align}
-
-     \end{itemize}
+        \end{itemize}
+    \item Convolutional with GAN: see \autoref{sub:ssl_gan}
 \end{itemize}
 
   \autoref{table:SSL_error} shows the resulting classification error on the test dataset. Currently we are unable to perform as well as the original paper \cite{DBLP:journals/corr/KingmaRMW14}. Some potential reasons are that we have pooling after convolutional layers, we are not using the most appropriate activation functions in the discriminator and in the generator and there are fully connected layers in the network. We are currently working on new network structures that replace pooling by strided convolutions (discriminator) and fractional-strided convolutions (decoder), repace ReLU in the discriminator by LeakyReLU and remove unnecessary fully connected layers (as suggested in \cite{alec2016dcgan}).
@@ -674,7 +674,7 @@ Convolutional with GAN &  8.1\% &  9.2\%\\
 Kingma et al. \cite{DBLP:journals/corr/KingmaRMW14}
 & 2.4\% & 2.6\%
 \end{tabular}
-\caption{Validation/test error on MNIST (55000 training examples)}
+\caption{Test error on MNIST (55000 training examples)}
 \label{table:SSL_error}
 \end{table}
 
@@ -729,7 +729,7 @@ We see that simply taking DRAW as a black box and adding a GAN on top of it dire
 \end{figure}
 
 \section{Conclusion and Future Work}
-Variational auto-encoders and generative adversarial networks are two promising classes of generative models which have their respective drawbacks. For example, VAEs generate blurry images while GANs are difficult to train and generate images which lack variaty. This work serves as an initiate of combining various variants of VAEs with GANs. In particular, we propose CVAE-GAN, SSL-VAE-GAN and DRAW-GAN. We also apply generative models to the problems of image completion, style transfer and semi-supervised learning. While CVAE-GAN generated better images than the baseline model CVAE, SSL-VAE-GAN and DRAW-GAN fail to achieve expected performance. We propose several potential solutions to these problems and leave them to future work.
+Variational auto-encoders and generative adversarial networks are two promising classes of generative models which have their respective drawbacks. For example, VAEs generate blurry images while GANs are difficult to train and generate images which lack variety. This work demonstrates several instances of combining various variants of VAEs with GANs. In particular, we propose CVAE-GAN, SSL-VAE-GAN and DRAW-GAN. We also apply generative models to the problems of image completion, style transfer and semi-supervised learning. We observe that CVAE-GAN generates better images than the baseline model CVAE, but SSL-VAE-GAN and DRAW-GAN fail to achieve expected performance. We propose several potential solutions to these problems and leave them to future work.
 \section{Lessons Learned}
 \begin{itemize}
 \item TensorFlow, although tricky to learn at first, became quite helpful when building more complicated models. In particular, the TensorFlow-Slim library allowed us to access standard neural network layers easily so that we did not have to manage weights and variables manually.
