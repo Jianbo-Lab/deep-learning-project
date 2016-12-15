@@ -345,7 +345,7 @@ There are three main differences between the DRAW and vanilla VAE.
 
 \autoref{figure:draw_structure} shows the structure of DRAW. The input for each encoder cell is convoluted image, where the convolution is computed by the previous decoder cell. Thus the input for each encoder is dynamically computed.
 
-The loss comes from two parts. The decoder loss is the same as the vanilla VAE: only the final canvas matrix (which is the cumulative sum of the previous decoder output) is used to compute the distribution of the data $D(x|c_T)$. If the input is binary, the natural choice for D is a Bernoulli distribution with means given by $\sigma(c_T)$, and the reconstruction loss is the negative log probability of $x$ under $D$:
+The loss comes from two parts. The decoder loss is the same as the vanilla VAE: only the final canvas matrix (which is the cumulative sum of the previous decoder output) is used to compute the distribution of the data $D(x|c_T)$. If the input is binary, the natural choice for $D$ is a Bernoulli distribution with means given by $\sigma(c_T)$, and the reconstruction loss is the negative log probability of $x$ under $D$:
 
 $$L^{x} = - \log D(x|c_T)$$
 
@@ -353,7 +353,7 @@ The encoder loss is different. DRAW uses cumulative Kullback-Leibler divergence 
 
 $$L^z = \sum_{t=1}^{T} KL(Q(Z_t|h_{t}^{enc})||Z_t) = \frac{1}{2}\sum_{t=1}^{T}(\mu_t^2 + \sigma_t^2 - \log \sigma^2_t) - T/2$$
 
-The total loss L for the network is the expectation of the sum of the reconstruction and latent losses:
+The total loss $L$ for the network is the expectation of the sum of the reconstruction and latent losses:
 $$L = \E_{z \sim Q} (L^z + L^x).$$
 
 Conditional DRAW is an extension of vanilla DRAW analogous to the CVAE described above. The input of the encoder and decoder of conditional DRAW is the same as vanilla DRAW, except with additional information (e.g. the label of the image).
